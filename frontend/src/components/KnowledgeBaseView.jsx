@@ -1,16 +1,56 @@
 import React, { useState } from 'react';
 import { Database, Search, Plus, ArrowRight } from 'lucide-react';
 
-export default function KnowledgeBaseView() {
+export default function KnowledgeBaseView({ apiOnline }) {
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [ingesting, setIngesting] = useState(false);
 
-  const docs = [
+  const [docs, setDocs] = useState([
     { id: "doc_faq_01", title: "Payment API Retry Rules & Idempotency", category: "faq", chunks: 4, updated: "Today", excerpt: "Requests to POST /api/v2/checkout require an Idempotency-Key header. Automatic retries trigger on HTTP 500, 502, 503 errors..." },
     { id: "doc_pol_02", title: "Handling Duplicate Card Charges & Refunds", category: "policy", chunks: 2, updated: "Yesterday", excerpt: "If a customer reports a duplicate authorization charge, verify transaction hashes in Stripe dashboard before issuing instant credit..." },
     { id: "doc_man_03", title: "Team Seat Upgrades & Prorated Billing", category: "manual", chunks: 5, updated: "3 days ago", excerpt: "Adding seats to an existing subscription calculates prorated charges for remaining days in current billing cycle..." },
     { id: "doc_gui_04", title: "Dark Mode Export Roadmap (FEAT-1049)", category: "guide", chunks: 3, updated: "1 week ago", excerpt: "Dark mode PDF generation is planned for Q3 release using Puppeteer headless renderer..." }
-  ];
+  ]);
+
+  const handleIngest = async () => {
+    setIngesting(true);
+    if (apiOnline) {
+      try {
+        const res = await fetch('/api/v1/knowledge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: "API Timeout & Backoff Guidelines v2",
+            content: "Clients encountering HTTP 504 Gateway Timeout during high volume batch processing must enable exponential backoff starting at 100ms jitter.",
+            source_type: "manual"
+          })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          alert(`Document Ingested into ChromaDB Vector Store! Doc ID: ${data.doc_id}, Chunks: ${data.chunks}`);
+          setDocs(prev => [
+            {
+              id: data.doc_id,
+              title: "API Timeout & Backoff Guidelines v2",
+              category: "manual",
+              chunks: data.chunks,
+              updated: "Just now",
+              excerpt: "Clients encountering HTTP 504 Gateway Timeout during high volume batch processing must enable exponential backoff starting at 100ms jitter."
+            },
+            ...prev
+          ]);
+          setIngesting(false);
+          return;
+        }
+      } catch (e) {
+        console.error("Ingest API error:", e);
+      }
+    }
+
+    alert("Simulating Document Ingestion: Chunked into 512-token segments and indexed into ChromaDB collection 'sentineldesk_manual'");
+    setIngesting(false);
+  };
 
   const filtered = docs.filter(d => {
     const matchesQ = d.title.toLowerCase().includes(query.toLowerCase()) || d.excerpt.toLowerCase().includes(query.toLowerCase());
@@ -34,11 +74,12 @@ export default function KnowledgeBaseView() {
         </div>
 
         <button 
-          onClick={() => alert("Document Ingestion Triggered: Ingesting sample_tickets/knowledge/ into ChromaDB...")}
-          className="flex items-center space-x-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition active:scale-95"
+          onClick={handleIngest}
+          disabled={ingesting}
+          className="flex items-center space-x-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-sm transition active:scale-95 disabled:opacity-50"
         >
           <Plus className="w-4 h-4" />
-          <span>Ingest New Document</span>
+          <span>{ingesting ? 'Indexing Vector Store...' : 'Ingest New Document'}</span>
         </button>
       </div>
 

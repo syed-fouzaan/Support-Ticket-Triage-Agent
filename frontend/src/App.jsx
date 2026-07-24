@@ -18,19 +18,37 @@ export default function App() {
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
 
-  // Poll backend health & tickets
+  // Poll backend health, tickets, and analytics metrics
   const fetchData = async () => {
     try {
-      const resHealth = await fetch('/api/v1/health/live', { signal: AbortSignal.timeout(2000) });
+      const resHealth = await fetch('/api/v1/health/live', { signal: AbortSignal.timeout(2500) });
       if (resHealth.ok) {
         setApiOnline(true);
+        
+        // 1. Fetch live tickets list from FastAPI
         const resTickets = await fetch('/api/v1/tickets');
         if (resTickets.ok) {
           const apiTickets = await resTickets.json();
           if (Array.isArray(apiTickets) && apiTickets.length > 0) {
-            setTickets(apiTickets);
+            setTickets(prev => {
+              // Merge mock tickets with api tickets so view is always rich
+              const existingIds = new Set(apiTickets.map(t => t.id));
+              const remainingMocks = prev.filter(t => !existingIds.has(t.id));
+              return [...apiTickets, ...remainingMocks];
+            });
           }
         }
+
+        // 2. Fetch live metrics from FastAPI
+        const resMetrics = await fetch('/api/v1/analytics/summary');
+        if (resMetrics.ok) {
+          const apiMetrics = await resMetrics.json();
+          setMetrics(prev => ({
+            ...prev,
+            ...apiMetrics
+          }));
+        }
+
       } else {
         setApiOnline(false);
       }
@@ -41,12 +59,24 @@ export default function App() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 10000);
+    const interval = setInterval(fetchData, 8000);
     return () => clearInterval(interval);
   }, []);
 
-  // Handle Ticket Actions
-  const handleApproveResolution = (ticketId, finalResolution) => {
+  // Handle Approve Resolution (POST /api/v1/tickets/{id}/approve)
+  const handleApproveResolution = async (ticketId, finalResolution) => {
+    if (apiOnline) {
+      try {
+        await fetch(`/api/v1/tickets/${ticketId}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resolution_text: finalResolution })
+        });
+      } catch (e) {
+        console.error("Approve API error:", e);
+      }
+    }
+
     setTickets(prev => prev.map(t => {
       if (t.id === ticketId) {
         return {
@@ -64,7 +94,16 @@ export default function App() {
     setSelectedTicket(null);
   };
 
-  const handleEscalateTicket = (ticketId) => {
+  // Handle Escalate Ticket (POST /api/v1/tickets/{id}/escalate)
+  const handleEscalateTicket = async (ticketId) => {
+    if (apiOnline) {
+      try {
+        await fetch(`/api/v1/tickets/${ticketId}/escalate`, { method: 'POST' });
+      } catch (e) {
+        console.error("Escalate API error:", e);
+      }
+    }
+
     setTickets(prev => prev.map(t => {
       if (t.id === ticketId) {
         return {
@@ -82,9 +121,32 @@ export default function App() {
     setSelectedTicket(null);
   };
 
+  // Handle Create Ticket (POST /api/v1/tickets -> Runs 7-Agent LangGraph Workflow)
   const handleCreateTicket = async (newTicketData) => {
+    if (apiOnline) {
+      try {
+        const res = await fetch('/api/v1/tickets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newTicketData)
+        });
+        if (res.ok) {
+          const processedTicket = await res.json();
+          setTickets(prev => [processedTicket, ...prev]);
+          setMetrics(prev => ({
+            ...prev,
+            total_tickets: prev.total_tickets + 1
+          }));
+          return;
+        }
+      } catch (e) {
+        console.error("Create ticket API error:", e);
+      }
+    }
+
+    // Fallback if API offline
     const newId = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
-    const createdTicket = {
+    const fallbackTicket = {
       id: newId,
       customer_id: `cus_${newTicketData.customer_tier}_${Math.floor(Math.random() * 100)}`,
       customer_name: newTicketData.customer_name,
@@ -113,7 +175,7 @@ export default function App() {
       ]
     };
 
-    setTickets(prev => [createdTicket, ...prev]);
+    setTickets(prev => [fallbackTicket, ...prev]);
     setMetrics(prev => ({
       ...prev,
       total_tickets: prev.total_tickets + 1
@@ -123,7 +185,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#F4F6F9] text-slate-900 flex font-sans antialiased">
       
-      {/* Left Sidebar (Matching reference design) */}
+      {/* Left Sidebar */}
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
@@ -156,7 +218,7 @@ export default function App() {
           )}
 
           {activeTab === 'knowledge' && (
-            <KnowledgeBaseView />
+            <KnowledgeBaseView apiOnline={apiOnline} />
           )}
 
           {activeTab === 'security' && (
