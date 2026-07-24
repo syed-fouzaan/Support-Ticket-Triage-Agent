@@ -8,6 +8,8 @@ import CustomerPortalModal from './components/CustomerPortalModal';
 import SecurityAuditView from './components/SecurityAuditView';
 import KnowledgeBaseView from './components/KnowledgeBaseView';
 
+import { Agentation } from 'agentation';
+
 import { MOCK_TICKETS, MOCK_METRICS } from './mockData';
 
 export default function App() {
@@ -249,6 +251,9 @@ export default function App() {
           onSubmitTicket={handleCreateTicket}
         />
       )}
+
+      {/* Agentation Overlay */}
+      {typeof Agentation !== 'undefined' && <Agentation />}
 
     </div>
   );
