@@ -57,13 +57,31 @@ async def trace_id_middleware(request: Request, call_next):
     latency_ms = int((time.monotonic() - start) * 1000)
     response.headers["X-Trace-Id"] = trace_id
     logger.info(
-        f"{request.method} {request.url.path} → {response.status_code} ({latency_ms}ms)",
+        f"{request.method} {request.url.path} -> {response.status_code} ({latency_ms}ms)",
         extra={"latency_ms": latency_ms},
     )
     return response
 
 
-# ── Health endpoints ──────────────────────────────────────────────────────────
+# ── Root & Health endpoints ──────────────────────────────────────────────────
+@app.get("/", tags=["Root"])
+async def root():
+    """Root landing endpoint — returns API information and quick links."""
+    return {
+        "service": "SentinelDesk Multi-Agent AI API",
+        "version": "1.0.0",
+        "status": "online",
+        "documentation": "/docs",
+        "frontend_ui": "http://localhost:5173",
+        "endpoints": {
+            "health_live": "/api/v1/health/live",
+            "tickets": "/api/v1/tickets",
+            "knowledge": "/api/v1/knowledge",
+            "analytics": "/api/v1/analytics/summary"
+        }
+    }
+
+
 @app.get("/health", include_in_schema=False)
 @app.get("/api/v1/health/live", tags=["Health"])
 async def liveness():
