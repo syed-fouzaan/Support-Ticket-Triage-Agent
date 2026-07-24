@@ -121,8 +121,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col font-sans antialiased relative">
       
+      {/* Ambient Radial Mesh Background */}
+      <div className="ambient-bg"></div>
+
       {/* Header Bar */}
       <Header 
         activeTab={activeTab} 
