@@ -102,8 +102,10 @@ async def readiness():
     return {"status": "ready", "checks": checks}
 
 
-# ── Routers (registered after M2+) ───────────────────────────────────────────
-# from backend.api.routers import tickets, auth, knowledge, analytics, webhooks
-# app.include_router(tickets.router, prefix="/api/v1")
-# app.include_router(auth.router, prefix="/api/v1")
-# ... (uncommented as each milestone completes)
+# ── Routers ───────────────────────────────────────────────────────────────────
+from backend.api.routers import tickets, knowledge, analytics
+
+app.include_router(tickets.router)
+app.include_router(knowledge.router)
+app.include_router(analytics.router)
+
