@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import MetricsBar from './components/MetricsBar';
 import TicketQueue from './components/TicketQueue';
@@ -23,7 +24,6 @@ export default function App() {
       const resHealth = await fetch('/api/v1/health/live', { signal: AbortSignal.timeout(2000) });
       if (resHealth.ok) {
         setApiOnline(true);
-        // Try fetching tickets from backend API
         const resTickets = await fetch('/api/v1/tickets');
         if (resTickets.ok) {
           const apiTickets = await resTickets.json();
@@ -121,44 +121,55 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05070E] text-slate-100 flex flex-col font-sans antialiased relative">
+    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 flex font-sans antialiased">
       
-      {/* Ambient Radial Mesh Background */}
-      <div className="ambient-bg"></div>
-
-      {/* Header Bar */}
-      <Header 
+      {/* Left Sidebar (Matching reference design) */}
+      <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
         onNewTicket={() => setShowNewTicketModal(true)}
-        apiOnline={apiOnline}
-        metrics={metrics}
-        onRefresh={fetchData}
       />
 
-      {/* Main Content Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* Top Stat Cards */}
-        <MetricsBar metrics={metrics} />
-
-        {/* Tab View Switching */}
-        {activeTab === 'triage' && (
-          <TicketQueue 
-            tickets={tickets} 
-            onSelectTicket={(t) => setSelectedTicket(t)} 
+      {/* Main Right Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          
+          {/* Header Bar */}
+          <Header 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab}
+            onNewTicket={() => setShowNewTicketModal(true)}
+            apiOnline={apiOnline}
+            metrics={metrics}
+            onRefresh={fetchData}
           />
-        )}
 
-        {activeTab === 'knowledge' && (
-          <KnowledgeBaseView />
-        )}
+          {/* Metrics Strip */}
+          <MetricsBar metrics={metrics} />
 
-        {activeTab === 'security' && (
-          <SecurityAuditView />
-        )}
+          {/* Main Tab Views */}
+          {activeTab === 'triage' && (
+            <TicketQueue 
+              tickets={tickets} 
+              onSelectTicket={(t) => setSelectedTicket(t)} 
+            />
+          )}
 
-      </main>
+          {activeTab === 'knowledge' && (
+            <KnowledgeBaseView />
+          )}
+
+          {activeTab === 'security' && (
+            <SecurityAuditView />
+          )}
+
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-200/80 bg-white py-3 text-center text-xs text-slate-400 font-medium">
+          SentinelDesk 🛡️ Minimal Support Operations AI Platform · Built for Rooman Technologies
+        </footer>
+      </div>
 
       {/* Modals */}
       {selectedTicket && (
@@ -176,11 +187,6 @@ export default function App() {
           onSubmitTicket={handleCreateTicket}
         />
       )}
-
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#0B0F19] py-4 text-center text-xs text-slate-500 font-mono">
-        SentinelDesk 🛡️ Multi-Agent AI Customer Support Triage Platform · Built for Rooman Technologies
-      </footer>
 
     </div>
   );

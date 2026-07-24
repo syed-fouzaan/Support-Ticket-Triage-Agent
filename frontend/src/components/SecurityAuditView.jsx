@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lock, ShieldAlert, CheckCircle2, AlertOctagon, Terminal } from 'lucide-react';
+import { Lock, Terminal } from 'lucide-react';
 
 export default function SecurityAuditView() {
   const securityLogs = [
@@ -13,52 +13,50 @@ export default function SecurityAuditView() {
     <div className="space-y-6">
       
       {/* Top Banner */}
-      <div className="glass-panel p-6 rounded-2xl border-l-4 border-l-indigo-500 flex items-center justify-between">
+      <div className="minimal-card p-6 border-l-4 border-l-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <Lock className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-bold text-white">OWASP LLM Top 10 Security Architecture</h2>
+            <Lock className="w-5 h-5 text-slate-900" />
+            <h2 className="text-base font-extrabold text-slate-900">OWASP LLM Top 10 Security Audit Stream</h2>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 mt-1 font-medium">
             Real-time security auditing, prompt injection deflection, SSRF validation, and append-only log verification.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-mono font-semibold">
-            100% Policy Compliance
-          </span>
-        </div>
+        <span className="px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-mono font-bold">
+          100% Security Compliant
+        </span>
       </div>
 
       {/* Security Audit Table */}
-      <div className="glass-panel p-6 rounded-2xl">
-        <div className="flex items-center justify-between mb-4">
+      <div className="minimal-card p-6">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
           <div className="flex items-center space-x-2">
-            <Terminal className="w-4 h-4 text-slate-400" />
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live OWASP Security Event Stream</h3>
+            <Terminal className="w-4 h-4 text-slate-500" />
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Live Security Event Log</h3>
           </div>
-          <span className="text-xs text-slate-500 font-mono">4 Events Logged</span>
+          <span className="text-xs text-slate-400 font-mono">4 Events Logged</span>
         </div>
 
         <div className="space-y-3 font-mono">
           {securityLogs.map((log) => (
-            <div key={log.id} className="p-4 bg-slate-900/80 rounded-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div key={log.id} className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
               <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="text-slate-500">{log.timestamp}</span>
-                  <span className="font-bold text-indigo-400">{log.id}</span>
-                  <span className="text-slate-300 font-semibold">{log.type}</span>
+                  <span className="text-slate-400">{log.timestamp}</span>
+                  <span className="font-bold text-slate-900">{log.id}</span>
+                  <span className="text-slate-800 font-semibold">{log.type}</span>
                   <span className="text-slate-500">[{log.target}]</span>
                 </div>
-                <p className="text-slate-400 font-sans text-xs">{log.detail}</p>
+                <p className="text-slate-600 font-sans text-xs font-medium">{log.detail}</p>
               </div>
 
               <div className="flex items-center space-x-2 shrink-0">
-                <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
-                  log.severity === 'HIGH' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' :
-                  log.severity === 'MEDIUM' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                  'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase ${
+                  log.severity === 'HIGH' ? 'bg-rose-100 text-rose-800 border border-rose-200' :
+                  log.severity === 'MEDIUM' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
+                  'bg-sky-100 text-sky-800 border border-sky-200'
                 }`}>
                   {log.action} ({log.severity})
                 </span>
