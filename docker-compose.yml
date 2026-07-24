@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+  # ── ChromaDB (vector store) ─── starts first ──────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chromadb_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - sentineldesk
+
+  # ── Backend (FastAPI) ─────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///./data/sentineldesk.db
+      - CHROMADB_PATH=/app/chromadb_data
+    volumes:
+      - chromadb_data:/app/chromadb_data
+      - sqlite_data:/app/data
+    depends_on:
+      chromadb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - sentineldesk
+
+volumes:
+  chromadb_data:
+  sqlite_data:
+
+networks:
+  sentineldesk:
+    driver: bridge

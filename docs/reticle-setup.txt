@@ -1,0 +1,23 @@
+Reticle is the proof layer for the SentinelDesk React dashboard.
+It instruments the running frontend from the inside (network, store state, React commit stream)
+and hands back pass/fail verdicts with file:line evidence after every edit.
+
+Installation (run once after scaffolding the frontend):
+  npx @reticlehq/server init
+
+This auto-detects Vite/React, installs @reticlehq/react + the Vite build plugin,
+and registers the MCP server.
+
+Or install manually:
+  npm install --save-dev @reticlehq/react
+  # Add to vite.config.ts: import reticle from '@reticlehq/vite-plugin'; plugins: [reticle()]
+  # Add to main.tsx: import '@reticlehq/react';
+
+After setup, Reticle verifies the dashboard on every code edit:
+- Ticket queue renders (Hot/Warm/Cold urgency lanes present)
+- API calls to /api/v1/tickets succeed (no silent 500s)
+- Approval flow persists state correctly
+- Analytics chart reflects seeded data
+
+Note: Reticle is dev-only, localhost-only, no telemetry (Apache-2.0 SDK).
+It does NOT run in production builds — the plugin tree-shakes it out.

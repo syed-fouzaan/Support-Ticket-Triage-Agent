@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env.local
+
+# ── SECRETS — NEVER COMMIT ──────────────────────────────────────────────────
+.env
+# .env.example is intentionally committed (no real secrets)
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+chromadb_data/
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ── Test/Coverage ─────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# (docker-compose.yml is committed — only ignore local overrides)
+docker-compose.override.yml
+
+# ── spaCy models (large, downloaded at build time) ───────────────────────────
+en_core_web_sm/
+en_core_web_md/
+en_core_web_lg/
+
+# ── Node (frontend, when scaffolded) ─────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/

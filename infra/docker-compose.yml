@@ -1,0 +1,61 @@
+version: "3.9"
+
+services:
+  # ── Backend (FastAPI) ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    volumes:
+      - chromadb_data:/app/chromadb_data
+      - sqlite_data:/app/data
+    depends_on:
+      - chromadb
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - sentineldesk
+
+  # ── ChromaDB (vector store) ───────────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    volumes:
+      - chromadb_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    restart: unless-stopped
+    networks:
+      - sentineldesk
+
+  # ── Frontend (React/Vite) ─────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - sentineldesk
+
+volumes:
+  chromadb_data:
+  sqlite_data:
+
+networks:
+  sentineldesk:
+    driver: bridge
