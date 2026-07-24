@@ -12,9 +12,14 @@ from __future__ import annotations
 import hashlib
 import uuid
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Any
 
-from sentence_transformers import SentenceTransformer
+try:
+    from sentence_transformers import SentenceTransformer
+    _SENTENCE_TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    _SENTENCE_TRANSFORMERS_AVAILABLE = False
+    SentenceTransformer = Any
 
 from backend.core.config import settings
 from backend.core.logging import get_logger
@@ -24,15 +29,16 @@ from backend.vectordb.client import get_or_create_collection
 logger = get_logger(__name__)
 
 # Embedding model — loaded once, runs locally
-_embedder: Optional[SentenceTransformer] = None
+_embedder: Optional[Any] = None
 
 
-def get_embedder() -> SentenceTransformer:
+def get_embedder():
     global _embedder
+    if not _SENTENCE_TRANSFORMERS_AVAILABLE:
+        raise RuntimeError("sentence-transformers package is not installed in local environment")
     if _embedder is None:
         logger.info("Loading bge-small-en-v1.5 embedding model...")
         _embedder = SentenceTransformer("BAAI/bge-small-en-v1.5")
-        logger.info("Embedding model loaded.")
     return _embedder
 
 

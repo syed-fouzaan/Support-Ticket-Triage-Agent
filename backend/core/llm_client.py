@@ -10,8 +10,7 @@ import asyncio
 from typing import Any, Dict, List, Optional, Type
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from pydantic import BaseModel
 
 from backend.core.circuit_breaker import llm_circuit_breaker
@@ -95,3 +94,29 @@ async def invoke_llm_structured(
         extra={"node_name": node_name},
     )
     return result
+
+
+class LLMClient:
+    """High-level LLM Client interface used by agent nodes."""
+    
+    async def generate_structured_output(
+        self,
+        prompt: str,
+        schema: Type[BaseModel],
+        system_instruction: str = "",
+    ) -> BaseModel:
+        messages = [
+            SystemMessage(content=system_instruction),
+            HumanMessage(content=prompt),
+        ]
+        return await invoke_llm_structured(messages=messages, output_schema=schema)
+
+
+_client_instance: Optional[LLMClient] = None
+
+
+def get_llm_client() -> LLMClient:
+    global _client_instance
+    if _client_instance is None:
+        _client_instance = LLMClient()
+    return _client_instance
