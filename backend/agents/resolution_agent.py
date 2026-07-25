@@ -3,7 +3,7 @@ SentinelDesk Agent — Draft Resolution Agent Node.
 Generates grounded response derived strictly from retrieved ChromaDB context.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 from backend.core.llm_client import get_llm_client
@@ -57,7 +57,7 @@ async def resolution_node(state: TicketState) -> TicketState:
 
     audit_entry = {
         "step": "Draft Generator Node",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Generated draft (Confidence: {confidence:.2f}, Requires Human: {requires_human})",
         "status": "warning" if requires_human else "success",
     }

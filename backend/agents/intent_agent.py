@@ -3,7 +3,7 @@ SentinelDesk Agent — Intent Classification Agent Node.
 Categorizes ticket into Billing, TechBug, FeatureRequest, AccountAccess, GeneralQuery, AbusePolicy.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 
 from backend.core.llm_client import get_llm_client
@@ -65,7 +65,7 @@ async def intent_node(state: TicketState) -> TicketState:
 
     audit_entry = {
         "step": "Intent Classifier Node",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Classified as '{intent}' (sub: {sub_intent}, confidence: {confidence:.2f})",
         "status": "success",
     }

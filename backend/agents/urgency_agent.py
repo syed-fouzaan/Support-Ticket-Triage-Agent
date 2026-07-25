@@ -3,7 +3,7 @@ SentinelDesk Agent — Urgency & Priority Agent Node.
 Assigns HOT, WARM, or COLD priority + numerical score based on SLA, customer tier, and keywords.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from backend.core.logging import get_logger
 from backend.graph.state import TicketState
 
@@ -36,7 +36,7 @@ async def urgency_node(state: TicketState) -> TicketState:
 
     audit_entry = {
         "step": "Urgency Node",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Urgency: {urgency} (Score: {urgency_score:.2f}) | {rationale}",
         "status": "warning" if urgency == "HOT" else "success",
     }

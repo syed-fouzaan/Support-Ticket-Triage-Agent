@@ -3,7 +3,7 @@ SentinelDesk Agent — RAG Retrieval Agent Node.
 Queries ChromaDB vector collections for top-6 grounding chunks and formats context for Resolution Agent.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from backend.core.logging import get_logger
 from backend.graph.state import TicketState
 from backend.vectordb.client import check_chromadb_connection
@@ -14,6 +14,7 @@ logger = get_logger(__name__)
 async def rag_node(state: TicketState) -> TicketState:
     query = f"{state.get('subject', '')} {state.get('pii_redacted_body', '')}"
     intent = state.get("intent", "GeneralQuery")
+    retry_count = state.get("rag_retry_count", 0) + 1
 
     retrieved_chunks = []
     rag_sources = []
@@ -51,8 +52,8 @@ async def rag_node(state: TicketState) -> TicketState:
         ]
 
     audit_entry = {
-        "step": "RAG Retrieval Node",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "step": f"RAG Retrieval Node (attempt {retry_count})",
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Retrieved {len(rag_sources)} grounding documents from ChromaDB",
         "status": "success",
     }
@@ -64,5 +65,6 @@ async def rag_node(state: TicketState) -> TicketState:
         **state,
         "retrieved_chunks": retrieved_chunks,
         "rag_sources": rag_sources,
+        "rag_retry_count": retry_count,
         "audit_trail": trail,
     }

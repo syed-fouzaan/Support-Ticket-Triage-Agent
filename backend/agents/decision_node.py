@@ -4,7 +4,7 @@ Evaluates state against confidence threshold (>= 0.75) and security rules.
 Assigns final status: SOLVED or ESCALATED.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.graph.state import TicketState
@@ -41,7 +41,7 @@ async def decision_node(state: TicketState) -> TicketState:
 
     audit_entry = {
         "step": "Decision Node (Confidence Gate)",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Final Status: {final_status} | Reason: {reason}",
         "status": "danger" if final_status == "ESCALATED" else "success",
     }

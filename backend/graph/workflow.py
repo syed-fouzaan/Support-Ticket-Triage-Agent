@@ -21,6 +21,17 @@ from backend.graph.state import TicketState
 logger = get_logger(__name__)
 
 
+def route_resolution(state: TicketState) -> str:
+    """Conditional edge: Loops back to RAG step if resolution confidence is low (< 0.60)."""
+    confidence = state.get("resolution_confidence", 1.0)
+    retry_count = state.get("rag_retry_count", 0)
+
+    if confidence < 0.60 and retry_count < 2:
+        logger.info(f"Dynamic loopback: Resolution confidence ({confidence:.2f}) < 0.60. Retrying RAG node (attempt {retry_count + 1}).")
+        return "rag_step"
+    return "decision_step"
+
+
 def build_sentineldesk_graph():
     """Constructs and compiles the LangGraph StateGraph."""
     workflow = StateGraph(TicketState)
@@ -41,7 +52,16 @@ def build_sentineldesk_graph():
     workflow.add_edge("urgency_step", "duplicate_step")
     workflow.add_edge("duplicate_step", "rag_step")
     workflow.add_edge("rag_step", "resolution_step")
-    workflow.add_edge("resolution_step", "decision_step")
+    
+    # Dynamic loopback conditional edge: Resolution -> RAG or Decision
+    workflow.add_conditional_edges(
+        "resolution_step",
+        route_resolution,
+        {
+            "rag_step": "rag_step",
+            "decision_step": "decision_step",
+        },
+    )
     workflow.add_edge("decision_step", END)
 
     app = workflow.compile()

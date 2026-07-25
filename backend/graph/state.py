@@ -42,6 +42,7 @@ class TicketState(TypedDict, total=False):
     # RAG Retrieval Agent outputs
     retrieved_chunks: List[Dict[str, Any]]
     rag_sources: List[Dict[str, Any]]
+    rag_retry_count: int
 
     # Resolution Agent outputs
     resolution_draft: str

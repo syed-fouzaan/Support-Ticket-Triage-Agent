@@ -4,7 +4,7 @@ Sanitizes input, detects PII (regex + spaCy NER), scans for OWASP prompt injecti
 and initializes trace context.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 from backend.core.logging import get_logger
@@ -40,7 +40,7 @@ async def intake_node(state: TicketState) -> TicketState:
 
     audit_entry = {
         "step": "Intake Node",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Trace ID: {trace_id[:8]}... | PII Redacted: {pii_found} | Injection Flag: {is_injection}",
         "status": "danger" if is_injection else ("warning" if pii_found else "success"),
     }

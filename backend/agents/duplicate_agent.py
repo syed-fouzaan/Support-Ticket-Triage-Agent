@@ -3,7 +3,7 @@ SentinelDesk Agent — Duplicate Search Agent Node.
 Scans ChromaDB open tickets collection to flag duplicate submissions (> 0.85 similarity).
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from backend.core.config import settings
 from backend.core.logging import get_logger
 from backend.graph.state import TicketState
@@ -20,7 +20,7 @@ async def duplicate_node(state: TicketState) -> TicketState:
     # Safe default for state machine propagation:
     audit_entry = {
         "step": "Duplicate Search Node",
-        "timestamp": datetime.utcnow().strftime("%H:%M:%S"),
+        "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
         "detail": f"Duplicate scan completed: is_duplicate={is_duplicate}",
         "status": "success",
     }
