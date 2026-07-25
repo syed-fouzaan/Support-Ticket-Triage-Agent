@@ -8,6 +8,7 @@ from typing import Dict, Any
 
 from langgraph.graph import END, StateGraph
 
+from backend.agents.agentic_loop import agentic_react_node
 from backend.agents.decision_node import decision_node
 from backend.agents.duplicate_agent import duplicate_node
 from backend.agents.intake_agent import intake_node
@@ -36,11 +37,12 @@ def build_sentineldesk_graph():
     """Constructs and compiles the LangGraph StateGraph."""
     workflow = StateGraph(TicketState)
 
-    # 1. Add all 7 Nodes
+    # 1. Add all 8 Nodes (including Autonomous ReAct Agent Node)
     workflow.add_node("intake_step", intake_node)
     workflow.add_node("intent_step", intent_node)
     workflow.add_node("urgency_step", urgency_node)
     workflow.add_node("duplicate_step", duplicate_node)
+    workflow.add_node("agentic_step", agentic_react_node)
     workflow.add_node("rag_step", rag_node)
     workflow.add_node("resolution_step", resolution_node)
     workflow.add_node("decision_step", decision_node)
@@ -50,7 +52,8 @@ def build_sentineldesk_graph():
     workflow.add_edge("intake_step", "intent_step")
     workflow.add_edge("intent_step", "urgency_step")
     workflow.add_edge("urgency_step", "duplicate_step")
-    workflow.add_edge("duplicate_step", "rag_step")
+    workflow.add_edge("duplicate_step", "agentic_step")
+    workflow.add_edge("agentic_step", "rag_step")
     workflow.add_edge("rag_step", "resolution_step")
     
     # Dynamic loopback conditional edge: Resolution -> RAG or Decision

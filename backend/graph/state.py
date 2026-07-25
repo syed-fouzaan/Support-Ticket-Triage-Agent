@@ -56,5 +56,6 @@ class TicketState(TypedDict, total=False):
     decision_reason: str
     assigned_team: Optional[str]
 
-    # Audit Trail
+    # Audit Trail & Agentic Tool Execution
+    executed_tool_calls: List[Dict[str, Any]]
     audit_trail: List[Dict[str, Any]]
