@@ -1,64 +1,22 @@
-version: "3.9"
+version: '3.8'
 
 services:
-  # ── Frontend (React + Vite + Nginx) ───────────────────────────────────────
-  frontend:
+  sentineldesk-api:
     build:
       context: .
-      dockerfile: infra/Dockerfile.frontend
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
-    restart: unless-stopped
-    networks:
-      - sentineldesk
-
-  # ── ChromaDB (vector store) ─── starts first ──────────────────────────────
-  chromadb:
-    image: chromadb/chroma:latest
-    ports:
-      - "8001:8000"
-    volumes:
-      - chromadb_data:/chroma/chroma
-    environment:
-      - IS_PERSISTENT=TRUE
-      - ANONYMIZED_TELEMETRY=FALSE
-    restart: unless-stopped
-    networks:
-      - sentineldesk
-
-  # ── Backend (FastAPI) ─────────────────────────────────────────────────────
-  backend:
-    build:
-      context: .
-      dockerfile: infra/Dockerfile.backend
+      dockerfile: Dockerfile
+    container_name: sentineldesk_api
     ports:
       - "8000:8000"
-    env_file:
-      - .env
     environment:
-      - DATABASE_URL=sqlite+aiosqlite:///./data/sentineldesk.db
-      - CHROMADB_PATH=/app/chromadb_data
-    volumes:
-      - chromadb_data:/app/chromadb_data
-      - sqlite_data:/app/data
-    depends_on:
-      - chromadb
+      - APP_ENV=production
+      - LLM_PROVIDER=gemini
+      - LLM_MODEL=gemini-2.0-flash
+      - CHROMADB_HOST=localhost
+      - CHROMADB_PORT=8000
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    restart: unless-stopped
-    networks:
-      - sentineldesk
-
-volumes:
-  chromadb_data:
-  sqlite_data:
-
-networks:
-  sentineldesk:
-    driver: bridge
+      interval: 30s
+      timeout: 10s
+      retries: 3

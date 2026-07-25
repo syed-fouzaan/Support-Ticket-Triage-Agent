@@ -22,6 +22,11 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info(f"SentinelDesk starting up | env={settings.APP_ENV} | provider={settings.LLM_PROVIDER}")
+    try:
+        from backend.vectordb.seed import seed_vector_database_if_empty
+        seed_vector_database_if_empty()
+    except Exception as e:
+        logger.warning(f"Startup vector seed skipped: {e}")
     yield
     logger.info("SentinelDesk shutting down.")
 
