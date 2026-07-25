@@ -21,6 +21,21 @@ class IngestDocumentRequest(BaseModel):
     source_type: str = Field("faq", description="faq, policy, manual, guide, bug, ticket")
 
 
+@router.get("", status_code=200)
+async def get_knowledge_info():
+    """Information endpoint for Knowledge Base operations."""
+    return {
+        "endpoint": "/api/v1/knowledge",
+        "description": "ChromaDB Knowledge Base Vector Store",
+        "usage": "Send a POST request to ingest documents",
+        "example_payload": {
+            "title": "Password Reset Guide",
+            "content": "To reset password, go to settings and select security...",
+            "source_type": "faq"
+        }
+    }
+
+
 @router.post("", status_code=201)
 async def create_knowledge_doc(req: IngestDocumentRequest):
     """Ingests a new document into ChromaDB vector store."""
@@ -34,3 +49,4 @@ async def create_knowledge_doc(req: IngestDocumentRequest):
     except Exception as e:
         logger.error(f"Error ingesting doc: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+

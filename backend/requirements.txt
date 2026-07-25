@@ -33,7 +33,7 @@ chromadb==0.5.23
 sentence-transformers==3.3.1
 
 # ── NLP / PII detection ───────────────────────────────────────────────────────
-spacy==3.8.3
+spacy>=3.8.0
 
 # ── HTTP / SSRF protection ────────────────────────────────────────────────────
 httpx==0.28.1
