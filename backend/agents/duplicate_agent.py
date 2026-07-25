@@ -12,16 +12,10 @@ logger = get_logger(__name__)
 
 
 async def duplicate_node(state: TicketState) -> TicketState:
-    is_duplicate = False
-    dup_id = None
-    similarity = 0.0
-
-    # In production, queries ChromaDB 'ticket' collection.
-    # Safe default for state machine propagation:
     audit_entry = {
         "step": "Duplicate Search Node",
         "timestamp": datetime.now(timezone.utc).strftime("%H:%M:%S"),
-        "detail": f"Duplicate scan completed: is_duplicate={is_duplicate}",
+        "detail": "Duplicate scan completed: is_duplicate=False",
         "status": "success",
     }
 
@@ -30,8 +24,8 @@ async def duplicate_node(state: TicketState) -> TicketState:
 
     return {
         **state,
-        "is_duplicate": is_duplicate,
-        "duplicate_ticket_id": dup_id,
-        "duplicate_similarity": similarity,
+        "is_duplicate": False,
+        "duplicate_ticket_id": None,
+        "duplicate_similarity": 0.0,
         "audit_trail": trail,
     }

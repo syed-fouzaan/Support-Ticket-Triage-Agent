@@ -54,14 +54,7 @@ def build_sentineldesk_graph():
     workflow.add_edge("rag_step", "resolution_step")
     
     # Dynamic loopback conditional edge: Resolution -> RAG or Decision
-    workflow.add_conditional_edges(
-        "resolution_step",
-        route_resolution,
-        {
-            "rag_step": "rag_step",
-            "decision_step": "decision_step",
-        },
-    )
+    workflow.add_conditional_edges("resolution_step", route_resolution)
     workflow.add_edge("decision_step", END)
 
     app = workflow.compile()

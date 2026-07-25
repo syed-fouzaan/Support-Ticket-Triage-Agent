@@ -4,6 +4,7 @@ Sanitizes input, detects PII (regex + spaCy NER), scans for OWASP prompt injecti
 and initializes trace context.
 """
 
+import re
 from datetime import datetime, timezone
 import uuid
 
@@ -13,30 +14,19 @@ from backend.security.pii import redact_pii
 
 logger = get_logger(__name__)
 
-INJECTION_KEYWORDS = [
-    "ignore previous instructions",
-    "ignore all instructions",
-    "ignore all previous instructions",
-    "system prompt",
-    "developer mode",
-    "export database",
-    "print your system prompt",
-    "disregard all prior context",
-    "print api keys",
-]
+_INJECTION_RE = re.compile(
+    r"ignore.*instruction|system prompt|developer mode|export database|print.*prompt|disregard.*context|print.*api",
+    re.IGNORECASE,
+)
 
 
 async def intake_node(state: TicketState) -> TicketState:
     body = state.get("body", "")
     trace_id = state.get("trace_id") or str(uuid.uuid4())
     
-    # 1. PII Redaction
     redacted_body = redact_pii(body)
     pii_found = (redacted_body != body)
-
-    # 2. Prompt Injection Check (OWASP LLM01)
-    lower_body = body.lower()
-    is_injection = any(kw in lower_body for kw in INJECTION_KEYWORDS)
+    is_injection = bool(_INJECTION_RE.search(body))
 
     audit_entry = {
         "step": "Intake Node",
