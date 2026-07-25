@@ -93,12 +93,28 @@ async def run_reticle_sweep():
         print("  [OK] Multi-Modal Attachment Ingested Successfully!")
 
         # 7. WebSocket Streaming Test
-        print("\n[7/7] Testing WebSocket Live Telemetry Stream (ws://localhost:8000/ws/live-triage)...")
+        print("\n[7/8] Testing WebSocket Live Telemetry Stream (ws://localhost:8000/ws/live-triage)...")
         async with websockets.connect("ws://localhost:8000/ws/live-triage") as ws:
             await ws.send("ping")
             ws_res = await ws.recv()
             assert json.loads(ws_res).get("type") == "pong", "WebSocket ping/pong failed!"
             print(f"  [OK] WebSocket Live Stream Active: {ws_res}")
+
+        # 8. Full Agentic ReAct Tool Loop Test
+        print("\n[8/8] Testing Full Agentic ReAct Tool Execution & Observation Loop...")
+        agentic_state = {
+            "ticket_id": "TKT-AGENTIC-001",
+            "subject": "Billing issue with double charge",
+            "body": "I was charged twice for invoice tx_inv_99841.",
+            "intent": "Billing",
+            "customer_email": "user@enterprise.com",
+        }
+        react_res = await run_ticket_triage_graph(agentic_state)
+        tool_calls = react_res.get("executed_tool_calls", [])
+        assert len(tool_calls) >= 3, f"Agentic tool calls failed: {tool_calls}"
+        print(f"  [OK] Full Agentic ReAct Executed {len(tool_calls)} Tools Dynamically!")
+        for tc in tool_calls:
+            print(f"    - Executed Tool: {tc.get('tool')}")
 
     print("\n=================================================================")
     print("[SUCCESS] RETICLE TEST SWEEP COMPLETE: 100% PASS RATE ACROSS ALL SYSTEMS")
