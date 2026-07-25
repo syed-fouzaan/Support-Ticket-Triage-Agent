@@ -65,6 +65,7 @@ async def create_ticket(req: CreateTicketRequest):
             "confidence": final_state["resolution_confidence"],
             "pii_found": final_state["pii_found"],
             "pii_redacted_body": final_state["pii_redacted_body"],
+            "is_injection_attempt": final_state.get("is_injection_attempt", False),
             "resolution_draft": final_state["resolution_draft"],
             "rag_sources": final_state.get("rag_sources", []),
             "audit_trail": final_state.get("audit_trail", []),
