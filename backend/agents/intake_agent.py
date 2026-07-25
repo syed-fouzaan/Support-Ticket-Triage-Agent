@@ -16,11 +16,13 @@ logger = get_logger(__name__)
 INJECTION_KEYWORDS = [
     "ignore previous instructions",
     "ignore all instructions",
+    "ignore all previous instructions",
     "system prompt",
     "developer mode",
     "export database",
     "print your system prompt",
     "disregard all prior context",
+    "print api keys",
 ]
 
 

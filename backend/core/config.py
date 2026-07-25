@@ -43,7 +43,7 @@ class Settings(BaseSettings):
         description="API key for the selected LLM provider. Never hardcoded.",
     )
     LLM_MODEL: str = Field(
-        default="gemini-2.5-flash",
+        default="gemini-2.0-flash",
         description="Model name/ID on the provider.",
     )
     LLM_TIMEOUT_SECONDS: int = Field(
