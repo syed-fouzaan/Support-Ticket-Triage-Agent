@@ -78,15 +78,33 @@ async def invoke_llm_structured(
 ) -> BaseModel:
     """
     Invoke the LLM with structured output (schema-validated via Pydantic).
-    Wrapped in the circuit breaker. Raises on failure — callers handle retry/escalation.
+    Uses primary model with multi-model failover fallback (gemini-2.0-flash -> gemini-2.0-flash-lite).
+    Wrapped in the circuit breaker.
     """
-    llm = get_llm()
-    structured_llm = llm.with_structured_output(output_schema)
-
+    primary_llm = get_llm()
+    
     async def _call() -> BaseModel:
-        return await asyncio.get_event_loop().run_in_executor(
-            None, structured_llm.invoke, messages
-        )
+        try:
+            structured_llm = primary_llm.with_structured_output(output_schema)
+            return await asyncio.get_event_loop().run_in_executor(
+                None, structured_llm.invoke, messages
+            )
+        except Exception as primary_err:
+            logger.warning(f"Primary LLM invocation failed ({primary_err}). Attempting fallback model...")
+            # Fallback model attempt (gemini-2.0-flash-lite)
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                fallback_llm = ChatGoogleGenerativeAI(
+                    model="gemini-2.0-flash-lite",
+                    google_api_key=settings.LLM_API_KEY,
+                    temperature=0,
+                    request_timeout=15,
+                ).with_structured_output(output_schema)
+                return await asyncio.get_event_loop().run_in_executor(
+                    None, fallback_llm.invoke, messages
+                )
+            except Exception:
+                raise primary_err
 
     result = await llm_circuit_breaker.call(_call)
     logger.info(

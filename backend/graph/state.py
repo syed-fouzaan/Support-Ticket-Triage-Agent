@@ -15,6 +15,7 @@ class TicketState(TypedDict, total=False):
     customer_tier: str
     subject: str
     body: str
+    attachment_text: str
     channel: str
     trace_id: str
 

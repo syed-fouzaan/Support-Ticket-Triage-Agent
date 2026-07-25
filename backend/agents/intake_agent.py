@@ -22,6 +22,13 @@ _INJECTION_RE = re.compile(
 
 async def intake_node(state: TicketState) -> TicketState:
     body = state.get("body", "")
+    attachments = state.get("attachments") or []
+    attachment_text = state.get("attachment_text") or ""
+    
+    # Include attachment text if provided
+    if attachment_text:
+        body = f"{body}\n\n[Attachment Content]: {attachment_text}"
+
     trace_id = state.get("trace_id") or str(uuid.uuid4())
     
     redacted_body = redact_pii(body)
