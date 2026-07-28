@@ -15,19 +15,32 @@ from backend.core.config import settings
 from backend.core.logging import configure_logging, get_logger, set_trace_id
 from uuid import uuid4
 
+import os
+os.environ["ANONYMIZED_TELEMETRY"] = "False"
+
 configure_logging(settings.LOG_LEVEL)
 logger = get_logger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    import asyncio
+    from backend.core.sla_worker import run_sla_escalation_worker
+    from backend.core.email_digest import run_email_digest_scheduler
+
     logger.info(f"SentinelDesk starting up | env={settings.APP_ENV} | provider={settings.LLM_PROVIDER}")
     try:
         from backend.vectordb.seed import seed_vector_database_if_empty
         seed_vector_database_if_empty()
     except Exception as e:
         logger.warning(f"Startup vector seed skipped: {e}")
+
+    # Start background daemons
+    asyncio.create_task(run_sla_escalation_worker(30.0))
+    asyncio.create_task(run_email_digest_scheduler(24.0))
+
     yield
+    logger.info("SentinelDesk shutting down.")
     logger.info("SentinelDesk shutting down.")
 
 
@@ -50,16 +63,6 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["*"],
 )
-
-
-# ── Startup Lifecycle ────────────────────────────────────────────────────────
-@app.on_event("startup")
-async def on_startup():
-    import asyncio
-    from backend.core.sla_worker import run_sla_escalation_worker
-    from backend.core.email_digest import run_email_digest_scheduler
-    asyncio.create_task(run_sla_escalation_worker(30.0))
-    asyncio.create_task(run_email_digest_scheduler(24.0))
 
 
 # ── Trace ID & Security Headers middleware ─────────────────────────────────────
