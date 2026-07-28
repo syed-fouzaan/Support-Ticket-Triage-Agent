@@ -91,31 +91,48 @@ export default function VoiceCallSimulatorModal({ onClose, onSubmitTicket }) {
     setCallState('ENDED');
   };
 
-  const handleUserSpeech = (userText) => {
+  const handleUserSpeech = async (userText) => {
     if (!userText) return;
-    setTranscript((prev) => [
-      ...prev,
-      { sender: 'Customer', text: userText },
-    ]);
+    const newEntry = { sender: 'Customer', text: userText };
+    
+    setTranscript((prev) => {
+      const updatedHistory = [...prev, newEntry];
+      
+      // Fetch conversational AI response with context
+      fetch('/api/v1/tickets/voice/conversational-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_message: userText,
+          conversation_history: updatedHistory,
+        })
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.reply) {
+            setTranscript((curr) => [...curr, { sender: 'AI Agent', text: data.reply }]);
+          }
+        })
+        .catch(() => {
+          // Contextual Conversational AI fallback
+          let reply = `I hear you regarding "${userText}". I've logged this directly into your active support ticket.`;
+          const lower = userText.toLowerCase();
 
-    // Intelligent automated response based on user's query
-    setTimeout(() => {
-      let aiResponse = 'I have received your voice query and escalated it to our 16-node autonomous triage engine.';
-      const lower = userText.lower ? userText.lower() : userText.toLowerCase();
+          if (lower.includes('when') && (lower.includes('refund') || lower.includes('money') || lower.includes('expect'))) {
+            reply = "Refunds typically process within 3 to 5 business days back to your card. A confirmation receipt has been sent to your email.";
+          } else if (lower.includes('how much') || lower.includes('amount')) {
+            reply = "The duplicate charge being refunded is $49.00. You'll see it credited on your bank statement.";
+          } else if (lower.includes('email') || lower.includes('receipt') || lower.includes('confirm')) {
+            reply = "Yes, absolutely! A detailed confirmation receipt has been sent to your registered email address.";
+          } else if (lower.includes('billing') || lower.includes('charged') || lower.includes('refund')) {
+            reply = "I understand your billing concern. I am checking your account history and preparing an automated refund of $49.00.";
+          }
 
-      if (lower.includes('billing') || lower.includes('charge') || lower.includes('refund') || lower.includes('invoice')) {
-        aiResponse = 'I understand your billing concern. I am checking your account history and preparing an automated refund draft.';
-      } else if (lower.includes('api') || lower.includes('500') || lower.includes('error') || lower.includes('crash')) {
-        aiResponse = 'I have detected an API technical error. Tracing logs and attaching diagnostic telemetry to your ticket.';
-      } else if (lower.includes('password') || lower.includes('login') || lower.includes('auth')) {
-        aiResponse = 'I can help with authentication. Generating a secure 2FA password reset link for your account.';
-      }
+          setTranscript((curr) => [...curr, { sender: 'AI Agent', text: reply }]);
+        });
 
-      setTranscript((prev) => [
-        ...prev,
-        { sender: 'AI Agent', text: aiResponse },
-      ]);
-    }, 1000);
+      return updatedHistory;
+    });
   };
 
   const handleSendTextQuery = (e) => {

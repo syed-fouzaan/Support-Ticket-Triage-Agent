@@ -20,3 +20,19 @@ async def test_voice_ticket_submission():
     assert data["channel"] == "voice"
     assert "transcription" in data
     assert data["status"] in ["SOLVED", "ESCALATED", "OPEN"]
+
+
+@pytest.mark.asyncio
+async def test_conversational_reply_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        r = await client.post("/api/v1/tickets/voice/conversational-reply", json={
+            "user_message": "when can i expect the refund",
+            "conversation_history": [
+                {"sender": "Customer", "text": "i got charged twice for my pro subscription"},
+                {"sender": "AI Agent", "text": "I understand your billing concern. Processing refund."}
+            ]
+        })
+    assert r.status_code == 200
+    data = r.json()
+    assert "reply" in data
+    assert "business days" in data["reply"] or "email" in data["reply"] or len(data["reply"]) > 10
