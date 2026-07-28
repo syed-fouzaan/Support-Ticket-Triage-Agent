@@ -92,47 +92,58 @@ export default function VoiceCallSimulatorModal({ onClose, onSubmitTicket }) {
   };
 
   const handleUserSpeech = async (userText) => {
-    if (!userText) return;
-    const newEntry = { sender: 'Customer', text: userText };
-    
-    setTranscript((prev) => {
-      const updatedHistory = [...prev, newEntry];
-      
-      // Fetch conversational AI response with context
-      fetch('/api/v1/tickets/voice/conversational-reply', {
+    if (!userText || !userText.trim()) return;
+    const trimmed = userText.trim();
+    const customerMsg = { sender: 'Customer', text: trimmed };
+
+    // 1. Immediately update UI transcript with customer message
+    setTranscript((prev) => [...prev, customerMsg]);
+
+    const currentHistory = [...transcript, customerMsg];
+
+    // 2. Fetch AI Agent response or generate instant contextual reply
+    let aiReply = '';
+    try {
+      const res = await fetch('/api/v1/tickets/voice/conversational-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_message: userText,
-          conversation_history: updatedHistory,
+          user_message: trimmed,
+          conversation_history: currentHistory,
         })
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data && data.reply) {
-            setTranscript((curr) => [...curr, { sender: 'AI Agent', text: data.reply }]);
-          }
-        })
-        .catch(() => {
-          // Contextual Conversational AI fallback
-          let reply = `I hear you regarding "${userText}". I've logged this directly into your active support ticket.`;
-          const lower = userText.toLowerCase();
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.reply) {
+          aiReply = data.reply;
+        }
+      }
+    } catch (err) {
+      console.warn("Conversational API fetch error:", err);
+    }
 
-          if (lower.includes('when') && (lower.includes('refund') || lower.includes('money') || lower.includes('expect'))) {
-            reply = "Refunds typically process within 3 to 5 business days back to your card. A confirmation receipt has been sent to your email.";
-          } else if (lower.includes('how much') || lower.includes('amount')) {
-            reply = "The duplicate charge being refunded is $49.00. You'll see it credited on your bank statement.";
-          } else if (lower.includes('email') || lower.includes('receipt') || lower.includes('confirm')) {
-            reply = "Yes, absolutely! A detailed confirmation receipt has been sent to your registered email address.";
-          } else if (lower.includes('billing') || lower.includes('charged') || lower.includes('refund')) {
-            reply = "I understand your billing concern. I am checking your account history and preparing an automated refund of $49.00.";
-          }
+    // 3. Guaranteed immediate fallback if backend endpoint pending
+    if (!aiReply) {
+      const lower = trimmed.toLowerCase();
+      if (lower.includes('when') && (lower.includes('refund') || lower.includes('money') || lower.includes('expect'))) {
+        aiReply = "Refunds typically process within 3 to 5 business days back to your original payment card. A confirmation receipt has been sent to your email.";
+      } else if (lower.includes('how much') || lower.includes('amount')) {
+        aiReply = "The duplicate charge being refunded is $49.00. You'll see it credited on your bank statement shortly.";
+      } else if (lower.includes('email') || lower.includes('receipt') || lower.includes('confirm')) {
+        aiReply = "Yes, absolutely! A detailed confirmation receipt has been sent to your registered email address.";
+      } else if (lower.includes('billing') || lower.includes('charged') || lower.includes('refund') || lower.includes('pro')) {
+        aiReply = "I understand your billing concern regarding the $49.00 duplicate charge. I am verifying your transaction history and processing an automated refund.";
+      } else if (lower.includes('password') || lower.includes('login') || lower.includes('auth')) {
+        aiReply = "I can help with account access. Generating a 2FA password reset link for your registered email address.";
+      } else if (lower.includes('api') || lower.includes('500') || lower.includes('error') || lower.includes('crash')) {
+        aiReply = "I have detected an API technical error. Tracing logs and attaching diagnostic telemetry to your support ticket.";
+      } else {
+        aiReply = `I understand regarding "${trimmed}". I have logged this directly into your support ticket for our autonomous triage engine.`;
+      }
+    }
 
-          setTranscript((curr) => [...curr, { sender: 'AI Agent', text: reply }]);
-        });
-
-      return updatedHistory;
-    });
+    // 4. Append AI Agent reply to transcript
+    setTranscript((prev) => [...prev, { sender: 'AI Agent', text: aiReply }]);
   };
 
   const handleSendTextQuery = (e) => {
