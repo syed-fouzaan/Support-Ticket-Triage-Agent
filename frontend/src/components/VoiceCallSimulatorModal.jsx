@@ -26,19 +26,16 @@ export default function VoiceCallSimulatorModal({ onClose, onSubmitTicket }) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       const rec = new SpeechRecognition();
-      rec.continuous = true;
-      rec.interimResults = true;
+      rec.continuous = false;
+      rec.interimResults = false;
       rec.lang = 'en-US';
 
       rec.onresult = (event) => {
-        let finalTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+        if (event.results && event.results.length > 0) {
+          const spokenText = event.results[0][0].transcript;
+          if (spokenText && spokenText.trim()) {
+            handleUserSpeech(spokenText.trim());
           }
-        }
-        if (finalTranscript.trim()) {
-          handleUserSpeech(finalTranscript.trim());
         }
       };
 
@@ -55,8 +52,18 @@ export default function VoiceCallSimulatorModal({ onClose, onSubmitTicket }) {
     }
   }, []);
 
-  const startCall = () => {
+  const startCall = async () => {
     setCallState('CONNECTING');
+    
+    // Request browser microphone permission explicitly
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+    } catch (e) {
+      console.warn('Microphone permission request:', e);
+    }
+
     setTimeout(() => {
       setCallState('ACTIVE');
       setTranscript([
