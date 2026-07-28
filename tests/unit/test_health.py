@@ -57,3 +57,11 @@ async def test_chromadb_dual_node_failover():
 
     col = get_or_create_collection("faq")
     assert col is not None
+
+
+async def test_prometheus_metrics_endpoint():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        r = await client.get("/api/v1/analytics/prometheus")
+    assert r.status_code == 200
+    assert "sentineldesk_tickets_total" in r.text
+    assert "sentineldesk_auto_resolved_ratio" in r.text
