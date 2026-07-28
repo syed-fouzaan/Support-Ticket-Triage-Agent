@@ -7,6 +7,7 @@ import TicketInspector from './components/TicketInspector';
 import CustomerPortalModal from './components/CustomerPortalModal';
 import SecurityAuditView from './components/SecurityAuditView';
 import KnowledgeBaseView from './components/KnowledgeBaseView';
+import AnalyticsView from './components/AnalyticsView';
 
 import { Agentation } from 'agentation';
 
@@ -225,6 +226,10 @@ export default function App() {
 
           {activeTab === 'security' && (
             <SecurityAuditView />
+          )}
+
+          {activeTab === 'analytics' && (
+            <AnalyticsView />
           )}
 
         </main>
