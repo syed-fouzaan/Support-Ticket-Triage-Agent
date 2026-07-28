@@ -36,7 +36,7 @@ async def inject_chaos_fault(req: ChaosInjectionRequest):
         return {
             "status": "injected",
             "fault_type": fault,
-            "circuit_breaker_state": str(llm_circuit_breaker.state),
+            "circuit_breaker_state": llm_circuit_breaker.state.value.upper(),
             "message": "Circuit Breaker forced to OPEN state. System fallback mode active.",
         }
 
