@@ -52,15 +52,23 @@ app.add_middleware(
 )
 
 
-# ── Trace ID middleware ────────────────────────────────────────────────────────
+# ── Trace ID & Security Headers middleware ─────────────────────────────────────
 @app.middleware("http")
-async def trace_id_middleware(request: Request, call_next):
+async def security_headers_middleware(request: Request, call_next):
     trace_id = request.headers.get("X-Trace-Id", str(uuid4()))
     set_trace_id(trace_id)
     start = time.monotonic()
     response = await call_next(request)
     latency_ms = int((time.monotonic() - start) * 1000)
+    
+    # Standard Security Headers
     response.headers["X-Trace-Id"] = trace_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
     logger.info(
         f"{request.method} {request.url.path} -> {response.status_code} ({latency_ms}ms)",
         extra={"latency_ms": latency_ms},
