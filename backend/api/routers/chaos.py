@@ -30,12 +30,13 @@ async def inject_chaos_fault(req: ChaosInjectionRequest):
 
     if fault == "CIRCUIT_BREAKER_TRIP":
         # Force circuit breaker into OPEN state
+        from backend.core.circuit_breaker import CircuitState
         llm_circuit_breaker._failure_count = 5
-        llm_circuit_breaker.state = "OPEN"
+        llm_circuit_breaker._state = CircuitState.OPEN
         return {
             "status": "injected",
             "fault_type": fault,
-            "circuit_breaker_state": llm_circuit_breaker.state,
+            "circuit_breaker_state": str(llm_circuit_breaker.state),
             "message": "Circuit Breaker forced to OPEN state. System fallback mode active.",
         }
 
