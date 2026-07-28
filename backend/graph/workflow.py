@@ -9,6 +9,7 @@ from typing import Dict, Any
 from langgraph.graph import END, StateGraph
 
 from backend.agents.agentic_loop import agentic_react_node
+from backend.agents.csat_agent import csat_node
 from backend.agents.decision_node import decision_node
 from backend.agents.duplicate_agent import duplicate_node
 from backend.agents.intake_agent import intake_node
@@ -30,14 +31,14 @@ def route_resolution(state: TicketState) -> str:
     if confidence < 0.60 and retry_count < 2:
         logger.info(f"Dynamic loopback: Resolution confidence ({confidence:.2f}) < 0.60. Retrying RAG node (attempt {retry_count + 1}).")
         return "rag_step"
-    return "decision_step"
+    return "csat_step"
 
 
 def build_sentineldesk_graph():
     """Constructs and compiles the LangGraph StateGraph."""
     workflow = StateGraph(TicketState)
 
-    # 1. Add all 8 Nodes (including Autonomous ReAct Agent Node)
+    # 1. Add all 9 Nodes (including CSAT Predictor Node & Autonomous ReAct Agent Node)
     workflow.add_node("intake_step", intake_node)
     workflow.add_node("intent_step", intent_node)
     workflow.add_node("urgency_step", urgency_node)
@@ -45,6 +46,7 @@ def build_sentineldesk_graph():
     workflow.add_node("agentic_step", agentic_react_node)
     workflow.add_node("rag_step", rag_node)
     workflow.add_node("resolution_step", resolution_node)
+    workflow.add_node("csat_step", csat_node)
     workflow.add_node("decision_step", decision_node)
 
     # 2. Wire Linear & Conditional Edges
@@ -56,8 +58,9 @@ def build_sentineldesk_graph():
     workflow.add_edge("agentic_step", "rag_step")
     workflow.add_edge("rag_step", "resolution_step")
     
-    # Dynamic loopback conditional edge: Resolution -> RAG or Decision
+    # Dynamic loopback conditional edge: Resolution -> RAG or CSAT
     workflow.add_conditional_edges("resolution_step", route_resolution)
+    workflow.add_edge("csat_step", "decision_step")
     workflow.add_edge("decision_step", END)
 
     app = workflow.compile()

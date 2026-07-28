@@ -52,6 +52,10 @@ class TicketState(TypedDict, total=False):
     resolution_confidence: float
     requires_human: bool
 
+    # CSAT Predictor Node outputs
+    predicted_csat: float
+    csat_category: str
+
     # Decision Node outputs
     final_status: str  # OPEN, SOLVED, ESCALATED
     decision_reason: str

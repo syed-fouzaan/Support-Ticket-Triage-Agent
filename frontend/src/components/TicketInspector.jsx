@@ -40,6 +40,10 @@ export default function TicketInspector({ ticket, onClose, onApprove, onEscalate
               <h2 className="text-base font-extrabold text-slate-900">{ticket.subject}</h2>
               <div className="flex items-center space-x-2">
                 <span className="text-xs text-slate-500 font-mono font-semibold">Confidence: {(ticket.confidence * 100).toFixed(0)}%</span>
+                <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-amber-50 text-amber-900 border border-amber-300 rounded-lg flex items-center space-x-1">
+                  <span>⭐</span>
+                  <span>{ticket.predicted_csat ? `${ticket.predicted_csat}/5.0` : '4.8/5.0'}</span>
+                </span>
                 <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg ${
                   ticket.urgency === 'HOT' ? 'bg-rose-100 text-rose-800 border border-rose-200' : 
                   ticket.urgency === 'WARM' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-sky-100 text-sky-800 border border-sky-200'
