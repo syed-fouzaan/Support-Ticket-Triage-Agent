@@ -19,7 +19,7 @@ def generate_audit_certificate(ticket_state: Dict[str, Any]) -> Dict[str, Any]:
     certificate_data = {
         "certificate_id": f"CERT-SOC2-{ticket_id}-{int(datetime.now().timestamp())}",
         "ticket_id": ticket_id,
-        "org_id": ticket_state.get("org_id", "ACME-CORP"),
+        "org_id": ticket_state.get("org_id", "ROOMAN-TECH"),
         "customer_id": ticket_state.get("customer_id", "CUST-001"),
         "generated_at": now_iso,
         "compliance_standards": ["SOC2 Type II", "ISO 27001", "GDPR", "HIPAA"],

@@ -5,7 +5,7 @@ from backend.core.pdf_exporter import generate_audit_certificate, render_certifi
 def test_generate_audit_certificate_signature():
     ticket_state = {
         "ticket_id": "TKT-CERT-001",
-        "org_id": "ACME-CORP",
+        "org_id": "ROOMAN-TECH",
         "customer_id": "CUST-999",
         "resolution_confidence": 0.98,
         "pii_found": False,
@@ -22,7 +22,7 @@ def test_render_certificate_html():
     cert = {
         "certificate_id": "CERT-SOC2-1001",
         "ticket_id": "TKT-1001",
-        "org_id": "ACME-CORP",
+        "org_id": "ROOMAN-TECH",
         "generated_at": "2026-07-28T12:00:00Z",
         "confidence_score": 0.95,
         "sha256_signature": "a" * 64,

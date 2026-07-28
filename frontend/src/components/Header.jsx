@@ -66,7 +66,7 @@ export default function Header({ activeTab, setActiveTab, onNewTicket, onOpenVoi
               {apiOnline ? 'FastAPI Active' : 'Standalone Demo'}
             </span>
             <span style={{ color: '#cbd5e0', margin: '0 2px' }}>|</span>
-            <span style={{ fontWeight: 700, color: '#1a202c', fontSize: 11 }}>🏢 Org: Acme Corp</span>
+            <span style={{ fontWeight: 700, color: '#1a202c', fontSize: 11 }}>🏢 Org: Rooman Tech</span>
           </div>
 
           {/* Voice Simulator */}

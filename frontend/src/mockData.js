@@ -2,8 +2,8 @@ export const MOCK_TICKETS = [
   {
     id: "TKT-8941",
     customer_id: "cus_enterprise_99",
-    customer_name: "Acme Corp (Enterprise)",
-    customer_email: "alex.johnson@acme-corp.com",
+    customer_name: "Rooman Tech (Enterprise)",
+    customer_email: "alex.johnson@rooman-tech.com",
     customer_tier: "enterprise",
     subject: "Urgent: Payment API 500 error in production checkout flow",
     body: "Hi team, our production checkout is failing with a 500 error on POST /api/v2/checkout. Customer card 4111-XXXX-XXXX-1111 is getting charged twice! Please resolve ASAP.",
