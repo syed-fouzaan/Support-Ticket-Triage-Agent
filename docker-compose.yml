@@ -1,22 +1,39 @@
 version: '3.8'
 
 services:
-  sentineldesk-api:
+  sentineldesk-backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: sentineldesk_api
+    container_name: sentineldesk-backend
+    restart: always
     ports:
       - "8000:8000"
     environment:
-      - APP_ENV=production
       - LLM_PROVIDER=gemini
-      - LLM_MODEL=gemini-2.0-flash
-      - CHROMADB_HOST=localhost
-      - CHROMADB_PORT=8000
-    restart: unless-stopped
+      - LLM_MODEL=gemini-2.5-flash
+      - VECTORDB_PRIMARY_HOST=chromadb
+      - VECTORDB_PRIMARY_PORT=8000
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/readiness"]
+      interval: 15s
+      timeout: 5s
       retries: 3
+
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: sentineldesk-chromadb
+    restart: always
+    ports:
+      - "8001:8000"
+    environment:
+      - IS_PERSISTENT=TRUE
+      - PERSIST_DIRECTORY=/chroma/chroma
+    volumes:
+      - chromadb-data:/chroma/chroma
+
+volumes:
+  chromadb-data:

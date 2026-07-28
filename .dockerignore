@@ -1,0 +1,13 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.git
+.gitignore
+.agents
+frontend/node_modules
+frontend/dist
+.env
+.DS_Store
