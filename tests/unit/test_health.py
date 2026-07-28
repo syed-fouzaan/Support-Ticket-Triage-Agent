@@ -29,7 +29,20 @@ async def test_trace_id_header_returned():
 
 async def test_export_audit_certificate():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-        r = await client.get("/api/v1/tickets/TKT-8941/export-audit")
+        # Create ticket first
+        post_res = await client.post("/api/v1/tickets", json={
+            "customer_id": "cus_audit_test",
+            "customer_name": "Audit Tester",
+            "customer_email": "audit@company.com",
+            "customer_tier": "pro",
+            "subject": "Audit cert export test ticket",
+            "body": "Testing audit certificate export generation",
+            "channel": "web"
+        })
+        assert post_res.status_code == 201
+        tkt_id = post_res.json()["id"]
+
+        r = await client.get(f"/api/v1/tickets/{tkt_id}/export-audit")
     assert r.status_code == 200
     data = r.json()
     assert "sha256_verification_hash" in data
