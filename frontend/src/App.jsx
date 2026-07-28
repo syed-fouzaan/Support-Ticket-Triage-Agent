@@ -187,7 +187,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060B18] text-slate-200 flex font-sans antialiased">
+    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 flex font-sans antialiased">
       
       {/* Left Sidebar */}
       <Sidebar 
@@ -197,27 +197,28 @@ export default function App() {
       />
 
       {/* Main Right Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
-          
-          {/* Header Bar */}
-          <Header 
-            activeTab={activeTab} 
+      <div className="flex-1 flex flex-col min-w-0" style={{ background: '#f1f5f9' }}>
+
+        {/* Sticky Top Bar: Header tabs + Metrics strip */}
+        <div style={{ position: 'sticky', top: 0, zIndex: 40 }}>
+          <Header
+            activeTab={activeTab}
             setActiveTab={setActiveTab}
             onNewTicket={() => setShowNewTicketModal(true)}
             apiOnline={apiOnline}
             metrics={metrics}
             onRefresh={fetchData}
           />
-
-          {/* Metrics Strip */}
           <MetricsBar metrics={metrics} />
+        </div>
 
-          {/* Main Tab Views */}
+        {/* Scrollable Content */}
+        <main style={{ flex: 1, padding: '20px 24px', overflowY: 'auto' }}>
+
           {activeTab === 'triage' && (
-            <TicketQueue 
-              tickets={tickets} 
-              onSelectTicket={(t) => setSelectedTicket(t)} 
+            <TicketQueue
+              tickets={tickets}
+              onSelectTicket={(t) => setSelectedTicket(t)}
             />
           )}
 
@@ -240,8 +241,8 @@ export default function App() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-white/5 bg-black/20 backdrop-blur py-3 text-center text-xs text-slate-600 font-medium">
-          SentinelDesk 🛡️ Enterprise Autonomous AI Platform · 14 Nodes · 83 Tests · Built for Rooman Technologies
+        <footer style={{ borderTop: '1px solid #e2e8f0', background: '#fff', padding: '10px 0', textAlign: 'center', fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
+          SentinelDesk 🛡️ Enterprise Autonomous AI Platform · Built for Rooman Technologies
         </footer>
       </div>
 

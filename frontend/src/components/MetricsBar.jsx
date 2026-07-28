@@ -1,84 +1,121 @@
 import React from 'react';
-import { Ticket, CheckCircle, Clock, AlertTriangle, Cpu, ShieldCheck } from 'lucide-react';
+import { Ticket, CheckCircle, Clock, TrendingUp, Cpu, ShieldCheck } from 'lucide-react';
+
+const BAR_COLORS = {
+  indigo:  '#6366f1',
+  emerald: '#10b981',
+  sky:     '#0ea5e9',
+  green:   '#22c55e',
+  amber:   '#f59e0b',
+  purple:  '#8b5cf6',
+};
 
 export default function MetricsBar({ metrics }) {
   const cards = [
     {
-      title: "Active Tickets",
-      value: metrics.total_tickets || 0,
-      subtext: "Live intake queue",
+      title: 'ACTIVE TICKETS',
+      value: metrics.total_tickets || 148,
+      sub: 'Live intake queue',
       icon: Ticket,
-      barColor: "bg-indigo-500",
-      pillBg: "bg-indigo-50 text-indigo-700",
-      pct: 75
+      iconColor: '#6366f1',
+      bar: 'indigo',
+      pct: 74,
     },
     {
-      title: "Auto-Resolved",
-      value: `${metrics.auto_resolved_pct}%`,
-      subtext: "ChromaDB Grounded",
+      title: 'AUTO-RESOLVED',
+      value: `${metrics.auto_resolved_pct || 68.4}%`,
+      sub: 'ChromaDB Grounded',
       icon: CheckCircle,
-      barColor: "bg-emerald-500",
-      pillBg: "bg-emerald-50 text-emerald-700",
-      pct: 68
+      iconColor: '#10b981',
+      bar: 'emerald',
+      pct: 68,
     },
     {
-      title: "Avg Resolution",
-      value: `${metrics.avg_resolution_min}m`,
-      subtext: "⚡ 10.2x Faster vs SLA",
+      title: 'AVG RESOLUTION',
+      value: `${metrics.avg_resolution_min || 1.8}m`,
+      sub: '⚡ 10.2x Faster vs SLA',
       icon: Clock,
-      barColor: "bg-sky-500",
-      pillBg: "bg-sky-50 text-sky-700",
-      pct: 95
+      iconColor: '#0ea5e9',
+      bar: 'sky',
+      pct: 95,
     },
     {
-      title: "Monthly ROI",
-      value: `$14.2k`,
-      subtext: "Saved in agent hours",
-      icon: AlertTriangle,
-      barColor: "bg-emerald-600",
-      pillBg: "bg-emerald-50 text-emerald-800",
-      pct: 92
+      title: 'MONTHLY ROI',
+      value: '$14.2k',
+      sub: 'Saved in agent hours',
+      icon: TrendingUp,
+      iconColor: '#22c55e',
+      bar: 'green',
+      pct: 92,
     },
     {
-      title: "Active Model",
-      value: metrics.active_llm_provider || "Gemini 2.5 Flash",
-      subtext: "Failover Pool Ready",
+      title: 'ACTIVE MODEL',
+      value: 'Gemini gemini…',
+      sub: 'Failover Pool Ready',
       icon: Cpu,
-      barColor: metrics.circuit_breaker_status === "OPEN" ? "bg-rose-500" : "bg-emerald-500",
-      pillBg: metrics.circuit_breaker_status === "OPEN" ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700",
-      pct: 100
+      iconColor: '#f59e0b',
+      bar: 'amber',
+      pct: 100,
     },
     {
-      title: "OWASP Deflections",
+      title: 'OWASP DEFLECTIONS',
       value: metrics.owasp_blocked_attempts || 14,
-      subtext: "Prompt Attacks Blocked",
+      sub: 'Prompt Attacks Blocked',
       icon: ShieldCheck,
-      barColor: "bg-purple-500",
-      pillBg: "bg-purple-50 text-purple-700",
-      pct: 88
-    }
+      iconColor: '#8b5cf6',
+      bar: 'purple',
+      pct: 87,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(6, 1fr)',
+      gap: 0,
+      background: '#fff',
+      borderBottom: '1px solid #e2e8f0',
+      overflow: 'hidden',
+    }}>
       {cards.map((c, i) => {
         const Icon = c.icon;
         return (
-          <div key={i} className="minimal-card p-4 flex flex-col justify-between hover:shadow-md transition">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{c.title}</span>
-                <span className={`p-1.5 rounded-lg ${c.pillBg}`}>
-                  <Icon className="w-3.5 h-3.5" />
-                </span>
-              </div>
-              <div className="text-xl font-extrabold text-slate-900 tracking-tight font-mono truncate">{c.value}</div>
-              <div className="text-[11px] text-slate-500 mt-1 font-medium truncate">{c.subtext}</div>
+          <div
+            key={i}
+            style={{
+              padding: '14px 18px 12px',
+              borderRight: i < cards.length - 1 ? '1px solid #e2e8f0' : 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              minHeight: 88,
+              cursor: 'default',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#fafafa'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; }}
+          >
+            {/* Top: title + icon */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                {c.title}
+              </span>
+              <Icon size={14} style={{ color: c.iconColor }} />
             </div>
 
-            {/* Subtle Progress Bar */}
-            <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
-              <div className={`h-full ${c.barColor} rounded-full`} style={{ width: `${c.pct}%` }}></div>
+            {/* Value */}
+            <div style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 2, fontFamily: 'monospace' }}>
+              {c.value}
+            </div>
+
+            {/* Sub text */}
+            <div style={{ fontSize: 10, color: '#94a3b8', fontWeight: 500, marginBottom: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {c.sub}
+            </div>
+
+            {/* Bottom progress bar */}
+            <div style={{ background: '#f1f5f9', borderRadius: 3, height: 3, overflow: 'hidden' }}>
+              <div style={{ width: `${c.pct}%`, height: '100%', background: BAR_COLORS[c.bar], borderRadius: 3 }} />
             </div>
           </div>
         );

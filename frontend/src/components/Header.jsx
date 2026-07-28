@@ -1,66 +1,107 @@
 import React from 'react';
-import { RefreshCw, Plus } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 
 const TABS = [
-  { id: 'triage',    label: 'Triage Ops',      icon: '⚡' },
-  { id: 'knowledge', label: 'Knowledge Base',  icon: '🧠' },
-  { id: 'security',  label: 'Security',        icon: '🛡️' },
-  { id: 'analytics', label: 'Analytics',       icon: '📊' },
-  { id: 'kanban',    label: 'Kanban',          icon: '🗂️' },
+  { id: 'triage',    label: 'Triage Operations' },
+  { id: 'knowledge', label: 'Knowledge Base' },
+  { id: 'security',  label: 'Security & Audit' },
+  { id: 'analytics', label: 'Analytics & SLA' },
+  { id: 'kanban',    label: 'Kanban Board' },
 ];
 
 export default function Header({ activeTab, setActiveTab, onNewTicket, apiOnline, onRefresh }) {
   return (
-    <header className="mb-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+    <header style={{
+      background: '#ffffff',
+      borderBottom: '1px solid #e2e8f0',
+      padding: '0 24px',
+      marginBottom: 0,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 54 }}>
 
-        {/* Navigation Tab Pills */}
-        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-white/[0.04] border border-white/8 backdrop-blur-xl w-full md:w-auto">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`tab-pill flex items-center gap-1.5 whitespace-nowrap ${activeTab === tab.id ? 'active' : ''}`}
-            >
-              <span className="text-sm">{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+        {/* Tab Navigation */}
+        <nav style={{ display: 'flex', gap: 2 }}>
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  padding: '6px 16px',
+                  borderRadius: 8,
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: isActive ? 700 : 500,
+                  background: isActive ? '#1a202c' : 'transparent',
+                  color: isActive ? '#ffffff' : '#64748b',
+                  transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => { if (!isActive) e.currentTarget.style.background = '#f1f5f9'; }}
+                onMouseLeave={(e) => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-
-          {/* API Status */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 backdrop-blur-xl text-xs">
-            <span className="relative flex h-2 w-2">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${apiOnline ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${apiOnline ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* API status pill */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: '#f8fafc', border: '1px solid #e2e8f0',
+            borderRadius: 8, padding: '5px 12px', fontSize: 12,
+          }}>
+            <span style={{
+              width: 7, height: 7, borderRadius: '50%',
+              background: apiOnline ? '#48bb78' : '#f6ad55',
+              display: 'inline-block',
+              boxShadow: apiOnline ? '0 0 0 2px rgba(72,187,120,0.3)' : '0 0 0 2px rgba(246,173,85,0.3)',
+            }} />
+            <span style={{ fontWeight: 600, color: '#374151' }}>
+              {apiOnline ? 'FastAPI Active' : 'Standalone Demo'}
             </span>
-            <span className="font-semibold text-slate-300">{apiOnline ? 'FastAPI Active' : 'Demo Mode'}</span>
-            <span className="text-white/20">|</span>
-            <span className="font-mono text-[11px] font-bold text-slate-400">🏢 Acme Corp</span>
+            <span style={{ color: '#cbd5e0', margin: '0 2px' }}>|</span>
+            <span style={{ fontWeight: 700, color: '#1a202c', fontSize: 11 }}>🏢 Org: Acme Corp</span>
           </div>
 
           {/* Refresh */}
           <button
             onClick={onRefresh}
             title="Refresh Data"
-            className="p-2 rounded-xl bg-white/4 border border-white/8 text-slate-400 hover:text-slate-100 hover:bg-white/8 hover:border-indigo-500/30 transition-all active:scale-95"
+            style={{
+              background: '#f8fafc', border: '1px solid #e2e8f0',
+              borderRadius: 8, padding: '6px 8px', cursor: 'pointer',
+              color: '#64748b', display: 'flex', alignItems: 'center',
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#f1f5f9'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#f8fafc'; }}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw size={14} />
           </button>
 
           {/* New Ticket */}
           <button
             onClick={onNewTicket}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
-            style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)' }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              background: '#1a202c', color: '#fff',
+              border: 'none', borderRadius: 8,
+              padding: '6px 14px', cursor: 'pointer',
+              fontSize: 12, fontWeight: 700,
+              transition: 'background 0.15s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = '#2d3748'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = '#1a202c'; }}
           >
-            <Plus className="w-4 h-4" />
-            <span>New Ticket</span>
+            <Plus size={13} />
+            New Ticket
           </button>
-
         </div>
       </div>
     </header>

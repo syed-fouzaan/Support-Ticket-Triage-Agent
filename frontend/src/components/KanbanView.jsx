@@ -1,45 +1,66 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const URGENCY_STYLES = {
-  HOT:  { grad: 'from-rose-500/20 to-pink-500/10', border: 'border-rose-500/30', dot: 'bg-rose-500', text: 'text-rose-400', badge: 'bg-rose-500/20 text-rose-300' },
-  WARM: { grad: 'from-amber-500/20 to-orange-500/10', border: 'border-amber-500/30', dot: 'bg-amber-400', text: 'text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
-  COLD: { grad: 'from-sky-500/15 to-indigo-500/10', border: 'border-sky-500/25', dot: 'bg-sky-400', text: 'text-sky-400', badge: 'bg-sky-500/20 text-sky-300' },
+const URGENCY_CONFIG = {
+  HOT:  { dot: '#f56565', badge: '#f56565', cardBg: '#4a3040', cardBorder: '#744244' },
+  WARM: { dot: '#ed8936', badge: '#ed8936', cardBg: '#3d4028', cardBorder: '#6b5e2e' },
+  COLD: { dot: '#63b3ed', badge: '#63b3ed', cardBg: '#2d3f5c', cardBorder: '#3d5278' },
 };
 
 const COLUMNS = [
-  { id: 'OPEN', label: 'Open', desc: 'Awaiting Triage', accent: 'from-rose-500 to-orange-500', bg: 'bg-rose-500/8' },
-  { id: 'IN_PROGRESS', label: 'In Progress', desc: 'Agent Processing', accent: 'from-amber-400 to-yellow-400', bg: 'bg-amber-500/8' },
-  { id: 'RESOLVED', label: 'Resolved', desc: 'Autonomous / Human', accent: 'from-emerald-400 to-teal-400', bg: 'bg-emerald-500/8' },
+  { id: 'OPEN',        label: 'Open',        dot: '#f56565', desc: 'Awaiting Triage' },
+  { id: 'IN_PROGRESS', label: 'In Progress',  dot: '#f6e05e', desc: 'Agent Processing' },
+  { id: 'RESOLVED',    label: 'Resolved',     dot: '#68d391', desc: 'Autonomous / Human' },
 ];
 
 function TicketCard({ ticket, onDragStart }) {
-  const s = URGENCY_STYLES[ticket.urgency] || URGENCY_STYLES.COLD;
+  const urgency = ticket.urgency || 'COLD';
+  const cfg = URGENCY_CONFIG[urgency] || URGENCY_CONFIG.COLD;
+  const confidencePct = Math.round((ticket.confidence || 0.85) * 100);
+
   return (
     <div
       draggable
       onDragStart={(e) => onDragStart(e, ticket.id)}
-      className={`p-3.5 rounded-xl border bg-gradient-to-br ${s.grad} ${s.border} cursor-grab active:cursor-grabbing active:scale-95 transition-all duration-200 hover:shadow-lg hover:shadow-black/30 group`}
+      style={{
+        background: cfg.cardBg,
+        border: `1px solid ${cfg.cardBorder}`,
+        borderRadius: 9,
+        padding: '12px 14px',
+        marginBottom: 10,
+        cursor: 'grab',
+        transition: 'transform 0.15s, box-shadow 0.15s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.35)'; }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
     >
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <span className="font-mono text-[10px] text-slate-500">{ticket.id}</span>
-        <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${s.badge}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${s.dot} animate-pulse`}></span>
-          {ticket.urgency || 'COLD'}
+      {/* Top Row: ID + urgency badge */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
+        <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#a0aec0' }}>{ticket.id}</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: cfg.badge, fontSize: 10, fontWeight: 700 }}>
+          🔴 {urgency}
         </span>
       </div>
-      <p className="text-xs font-semibold text-slate-100 leading-snug line-clamp-2">{ticket.subject}</p>
-      <div className="mt-2.5 flex items-center justify-between gap-2">
-        <span className="text-[10px] text-slate-500 truncate">{ticket.customer_name || 'Customer'}</span>
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/8 text-slate-400 font-mono whitespace-nowrap">{ticket.intent || 'Unknown'}</span>
+
+      {/* Subject */}
+      <p style={{ color: '#f7fafc', fontSize: 12, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.4 }}>
+        {ticket.subject}
+      </p>
+
+      {/* Customer + Intent badge row */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <span style={{ color: '#718096', fontSize: 10 }}>{ticket.customer_name || 'Customer'}</span>
+        <span style={{
+          background: '#2d3748', color: '#e2e8f0', fontSize: 10, fontWeight: 600,
+          borderRadius: 5, padding: '2px 7px',
+        }}>
+          {ticket.intent || 'Billing'}
+        </span>
       </div>
-      {ticket.confidence != null && (
-        <div className="mt-2 w-full h-0.5 bg-white/5 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
-            style={{ width: `${Math.round(ticket.confidence * 100)}%` }}
-          />
-        </div>
-      )}
+
+      {/* Confidence bar */}
+      <div style={{ background: '#2d3748', borderRadius: 3, height: 4, overflow: 'hidden' }}>
+        <div style={{ width: `${confidencePct}%`, height: '100%', background: '#68d391', borderRadius: 3 }} />
+      </div>
     </div>
   );
 }
@@ -53,56 +74,54 @@ export default function KanbanView({ tickets = [], onTicketMove }) {
     tickets.forEach((t) => {
       const s = t.status || 'OPEN';
       if (grouped[s]) grouped[s].push(t);
-      else grouped['OPEN'].push(t);
+      else grouped.OPEN.push(t);
     });
     setColumns(grouped);
   }, [tickets]);
 
-  const handleDragStart = useCallback((e, id) => {
-    e.dataTransfer.setData('ticketId', id);
-    e.dataTransfer.effectAllowed = 'move';
+  const handleDragStart = useCallback((e, ticketId) => {
+    e.dataTransfer.setData('ticketId', ticketId);
   }, []);
 
-  const handleDrop = useCallback((e, targetCol) => {
+  const handleDrop = useCallback((e, targetColId) => {
     e.preventDefault();
-    const id = e.dataTransfer.getData('ticketId');
+    const ticketId = e.dataTransfer.getData('ticketId');
     setColumns((prev) => {
-      const next = { ...prev };
-      let moved = null;
-      for (const col of Object.keys(next)) {
-        const idx = next[col].findIndex((t) => t.id === id);
-        if (idx !== -1) { [moved] = next[col].splice(idx, 1); break; }
+      const updated = { ...prev, [targetColId]: [...prev[targetColId]] };
+      let movedTicket = null;
+      for (const colId of Object.keys(updated)) {
+        const idx = updated[colId].findIndex((t) => t.id === ticketId);
+        if (idx !== -1) {
+          updated[colId] = [...updated[colId]];
+          [movedTicket] = updated[colId].splice(idx, 1);
+          break;
+        }
       }
-      if (moved) {
-        moved = { ...moved, status: targetCol };
-        next[targetCol] = [moved, ...next[targetCol]];
-        onTicketMove?.(moved);
+      if (movedTicket) {
+        movedTicket = { ...movedTicket, status: targetColId };
+        updated[targetColId] = [movedTicket, ...updated[targetColId]];
+        onTicketMove?.(movedTicket);
       }
-      return next;
+      return updated;
     });
     setDragOverCol(null);
   }, [onTicketMove]);
 
-  const total = Object.values(columns).flat().length;
+  const totalCount = Object.values(columns).flat().length;
 
   return (
-    <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/5">
-        <div>
-          <h2 className="text-xl font-black flex items-center gap-2">
-            <span>🗂️</span>
-            <span className="gradient-text">Live Priority Kanban Board</span>
-          </h2>
-          <p className="text-xs text-slate-500 mt-1">Drag & drop to re-prioritize · Changes sync to triage engine</p>
-        </div>
-        <span className="text-xs font-mono text-slate-500 bg-white/5 border border-white/8 px-3 py-1 rounded-full">
-          {total} tickets
-        </span>
+    <div style={{ background: '#f1f5f9', minHeight: '100%' }}>
+
+      {/* Sub-header bar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #e2e8f0' }}>
+        <p style={{ color: '#64748b', fontSize: 12, margin: 0 }}>
+          Drag &amp; drop tickets between lanes · Changes sync to triage engine
+        </p>
+        <span style={{ color: '#64748b', fontSize: 12, fontWeight: 600 }}>{totalCount} total tickets</span>
       </div>
 
-      {/* Columns */}
-      <div className="grid grid-cols-3 gap-4 min-h-[60vh]">
+      {/* Kanban columns */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         {COLUMNS.map((col) => {
           const colTickets = columns[col.id] || [];
           const isOver = dragOverCol === col.id;
@@ -112,46 +131,46 @@ export default function KanbanView({ tickets = [], onTicketMove }) {
               onDragOver={(e) => { e.preventDefault(); setDragOverCol(col.id); }}
               onDragLeave={() => setDragOverCol(null)}
               onDrop={(e) => handleDrop(e, col.id)}
-              className={`flex flex-col rounded-2xl border transition-all duration-200 ${
-                isOver
-                  ? 'border-indigo-500/50 shadow-lg shadow-indigo-500/10 scale-[1.01]'
-                  : 'border-white/6'
-              } bg-white/[0.02]`}
+              style={{
+                background: isOver ? '#2d3f5c' : '#2d3748',
+                borderRadius: 12,
+                padding: 0,
+                minHeight: 500,
+                border: isOver ? '2px solid #63b3ed' : '2px solid transparent',
+                transition: 'border 0.2s, background 0.2s',
+                overflow: 'hidden',
+              }}
             >
-              {/* Column Header */}
-              <div className="p-4 border-b border-white/5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className={`inline-block w-2 h-2 rounded-full bg-gradient-to-r ${col.accent}`}></span>
-                      <p className="text-sm font-extrabold text-slate-100">{col.label}</p>
+              {/* Column header */}
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid #4a5568' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: col.dot, display: 'inline-block', boxShadow: `0 0 6px ${col.dot}` }} />
+                    <div>
+                      <p style={{ color: '#f7fafc', fontWeight: 800, fontSize: 13, margin: 0 }}>{col.label}</p>
+                      <p style={{ color: '#718096', fontSize: 10, margin: 0 }}>{col.desc}</p>
                     </div>
-                    <p className="text-[10px] text-slate-500 mt-0.5">{col.desc}</p>
                   </div>
-                  <span className={`text-xs font-mono font-black px-2.5 py-1 rounded-full bg-gradient-to-r ${col.accent} text-white shadow-md`}>
+                  <span style={{
+                    background: '#4a5568', color: '#f7fafc', borderRadius: '50%',
+                    width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 800,
+                  }}>
                     {colTickets.length}
                   </span>
                 </div>
-                {/* Progress bar */}
-                <div className="mt-3 w-full h-0.5 bg-white/5 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full bg-gradient-to-r ${col.accent} rounded-full transition-all duration-700`}
-                    style={{ width: total > 0 ? `${(colTickets.length / total) * 100}%` : '0%' }}
-                  />
-                </div>
               </div>
 
-              {/* Cards */}
-              <div className="flex-1 p-3 space-y-2.5 overflow-y-auto max-h-[62vh]">
+              {/* Cards area */}
+              <div style={{ padding: '12px 12px', maxHeight: 520, overflowY: 'auto' }}>
                 {colTickets.length === 0 ? (
-                  <div className={`flex flex-col items-center justify-center h-24 text-xs text-slate-600 border-2 border-dashed rounded-xl transition-all ${
-                    isOver ? 'border-indigo-500/40 text-indigo-400 bg-indigo-500/5' : 'border-white/8'
-                  }`}>
-                    {isOver ? (
-                      <><span className="text-2xl mb-1">↓</span><span>Drop here</span></>
-                    ) : (
-                      <><span className="text-2xl mb-1 opacity-30">📭</span><span>No tickets</span></>
-                    )}
+                  <div style={{
+                    border: '2px dashed #4a5568', borderRadius: 9,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    height: 80, color: isOver ? '#63b3ed' : '#718096', fontSize: 12,
+                    fontWeight: 500,
+                  }}>
+                    {isOver ? '↓ Drop here' : 'No tickets'}
                   </div>
                 ) : (
                   colTickets.map((t) => (
