@@ -58,6 +58,16 @@ async def security_headers_middleware(request: Request, call_next):
     trace_id = request.headers.get("X-Trace-Id", str(uuid4()))
     set_trace_id(trace_id)
     start = time.monotonic()
+    
+    # Rate limiting check
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    try:
+        from backend.security.auth import check_rate_limit
+        check_rate_limit(client_ip=client_ip, max_requests=200, window_sec=60)
+    except Exception as e:
+        if getattr(e, "status_code", None) == 429:
+            return JSONResponse(status_code=429, content={"detail": str(e.detail)})
+
     response = await call_next(request)
     latency_ms = int((time.monotonic() - start) * 1000)
     
