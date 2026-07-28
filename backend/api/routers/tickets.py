@@ -50,7 +50,9 @@ async def create_ticket(req: CreateTicketRequest):
     }
 
     try:
-        final_state = await run_ticket_triage_graph(initial_state)
+        from backend.core.lock_manager import TicketLockGuard
+        async with TicketLockGuard(req.customer_id or "default_customer"):
+            final_state = await run_ticket_triage_graph(initial_state)
         
         ticket_record = {
             "id": final_state["ticket_id"],
