@@ -174,7 +174,44 @@ export default function KnowledgeBaseView({ apiOnline }) {
         </button>
       </div>
 
-      {/* Controls */}
+      {/* 2D Semantic Vector Cluster Visualizer Map */}
+      <div className="minimal-card p-5 space-y-3 bg-slate-900 text-white rounded-3xl shadow-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Layers className="w-4 h-4 text-indigo-400" />
+            <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-200">2D Semantic Vector Space Cluster Map</h3>
+          </div>
+          <div className="flex items-center space-x-3 text-[11px] font-mono text-slate-400">
+            <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-emerald-400 mr-1.5"></span>Billing Cluster</span>
+            <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-indigo-400 mr-1.5"></span>OAuth & Auth</span>
+            <span className="flex items-center"><span className="w-2 h-2 rounded-full bg-amber-400 mr-1.5"></span>REST API</span>
+          </div>
+        </div>
+
+        <div className="relative h-44 w-full bg-slate-950/80 rounded-2xl border border-slate-800 p-4 overflow-hidden flex items-center justify-center">
+          {/* Spatial Grid Background */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:2rem_2rem] opacity-30"></div>
+
+          {/* Cluster Points */}
+          {/* Cluster 1: Billing */}
+          <div className="absolute left-[22%] top-[65%] flex items-center space-x-2 bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-xl shadow-lg animate-pulse">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span className="text-[10px] font-mono font-bold">Billing & Invoicing (14 docs)</span>
+          </div>
+
+          {/* Cluster 2: OAuth & SAML */}
+          <div className="absolute left-[70%] top-[25%] flex items-center space-x-2 bg-indigo-950/90 text-indigo-300 border border-indigo-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+            <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+            <span className="text-[10px] font-mono font-bold">OAuth / SAML SSO (18 docs)</span>
+          </div>
+
+          {/* Cluster 3: Technical REST API */}
+          <div className="absolute left-[48%] top-[48%] flex items-center space-x-2 bg-amber-950/90 text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-xl shadow-lg">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span className="text-[10px] font-mono font-bold">REST API & Rate Limit (22 docs)</span>
+          </div>
+        </div>
+      </div>
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-3.5 bg-white rounded-2xl border border-slate-200/80 shadow-sm">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 absolute left-3.5 top-3 text-slate-400" />

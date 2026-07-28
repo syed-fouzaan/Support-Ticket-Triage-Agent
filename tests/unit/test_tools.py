@@ -27,6 +27,20 @@ def test_ssrf_blocks_internal_ranges():
             validate_url(url)
 
 
+@pytest.mark.asyncio
+async def test_knowledge_clusters_endpoint():
+    from httpx import AsyncClient, ASGITransport
+    from backend.main import app
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        r = await client.get("/api/v1/knowledge/clusters")
+    assert r.status_code == 200
+    data = r.json()
+    assert data["status"] == "ok"
+    assert "clusters" in data
+    assert len(data["clusters"]) >= 3
+
+
 def test_ssrf_allows_public_domain(monkeypatch):
     import socket
     # Monkeypatch DNS resolution so we don't need real internet in CI
