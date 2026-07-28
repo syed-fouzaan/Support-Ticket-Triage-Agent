@@ -1,105 +1,67 @@
 import React from 'react';
-import { Search, Plus, RefreshCw, Activity, Database, Lock, Cpu } from 'lucide-react';
+import { RefreshCw, Plus } from 'lucide-react';
 
-export default function Header({ 
-  activeTab, 
-  setActiveTab, 
-  onNewTicket, 
-  apiOnline, 
-  metrics,
-  onRefresh 
-}) {
+const TABS = [
+  { id: 'triage',    label: 'Triage Ops',      icon: '⚡' },
+  { id: 'knowledge', label: 'Knowledge Base',  icon: '🧠' },
+  { id: 'security',  label: 'Security',        icon: '🛡️' },
+  { id: 'analytics', label: 'Analytics',       icon: '📊' },
+  { id: 'kanban',    label: 'Kanban',          icon: '🗂️' },
+];
+
+export default function Header({ activeTab, setActiveTab, onNewTicket, apiOnline, onRefresh }) {
   return (
     <header className="mb-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        
-        {/* Top Navigation Pills (matching reference image top bar) */}
-        <div className="flex items-center space-x-1.5 p-1 bg-white rounded-2xl border border-slate-200/80 shadow-sm w-full md:w-auto">
-          <button
-            onClick={() => setActiveTab('triage')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'triage'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
-          >
-            Triage Operations
-          </button>
-          <button
-            onClick={() => setActiveTab('knowledge')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'knowledge'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
-          >
-            Knowledge Base
-          </button>
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'security'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
-          >
-            Security & Audit
-          </button>
-          <button
-            onClick={() => setActiveTab('analytics')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'analytics'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
-          >
-            Analytics & SLA
-          </button>
-          <button
-            onClick={() => setActiveTab('kanban')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              activeTab === 'kanban'
-                ? 'bg-slate-900 text-white shadow-sm'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
-            }`}
-          >
-            Kanban Board
-          </button>
+
+        {/* Navigation Tab Pills */}
+        <div className="flex items-center gap-1 p-1.5 rounded-2xl bg-white/[0.04] border border-white/8 backdrop-blur-xl w-full md:w-auto">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`tab-pill flex items-center gap-1.5 whitespace-nowrap ${activeTab === tab.id ? 'active' : ''}`}
+            >
+              <span className="text-sm">{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
         </div>
 
-        {/* Right Status & Action Pills */}
-        <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
-          
-          <div className="flex items-center space-x-2 px-3 py-2 rounded-xl bg-white border border-slate-200/80 shadow-sm text-xs">
+        {/* Right Actions */}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+
+          {/* API Status */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/4 border border-white/8 backdrop-blur-xl text-xs">
             <span className="relative flex h-2 w-2">
               <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${apiOnline ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
               <span className={`relative inline-flex rounded-full h-2 w-2 ${apiOnline ? 'bg-emerald-500' : 'bg-amber-500'}`}></span>
             </span>
-            <span className="text-slate-700 font-semibold text-xs">{apiOnline ? 'FastAPI Active' : 'Standalone Demo'}</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-slate-900 font-mono text-[11px] font-extrabold flex items-center">
-              🏢 Org: Acme Corp
-            </span>
+            <span className="font-semibold text-slate-300">{apiOnline ? 'FastAPI Active' : 'Demo Mode'}</span>
+            <span className="text-white/20">|</span>
+            <span className="font-mono text-[11px] font-bold text-slate-400">🏢 Acme Corp</span>
           </div>
 
+          {/* Refresh */}
           <button
             onClick={onRefresh}
             title="Refresh Data"
-            className="p-2 rounded-xl bg-white border border-slate-200/80 text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition shadow-sm"
+            className="p-2 rounded-xl bg-white/4 border border-white/8 text-slate-400 hover:text-slate-100 hover:bg-white/8 hover:border-indigo-500/30 transition-all active:scale-95"
           >
             <RefreshCw className="w-4 h-4" />
           </button>
 
+          {/* New Ticket */}
           <button
             onClick={onNewTicket}
-            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all active:scale-95 shadow-lg shadow-indigo-500/25"
+            style={{ background: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)' }}
           >
             <Plus className="w-4 h-4" />
             <span>New Ticket</span>
           </button>
 
         </div>
-
       </div>
     </header>
   );

@@ -187,7 +187,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F4F6F9] text-slate-900 flex font-sans antialiased">
+    <div className="min-h-screen bg-[#060B18] text-slate-200 flex font-sans antialiased">
       
       {/* Left Sidebar */}
       <Sidebar 
@@ -198,7 +198,7 @@ export default function App() {
 
       {/* Main Right Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 relative z-10">
           
           {/* Header Bar */}
           <Header 
@@ -240,8 +240,8 @@ export default function App() {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-slate-200/80 bg-white py-3 text-center text-xs text-slate-400 font-medium">
-          SentinelDesk 🛡️ Minimal Support Operations AI Platform · Built for Rooman Technologies
+        <footer className="border-t border-white/5 bg-black/20 backdrop-blur py-3 text-center text-xs text-slate-600 font-medium">
+          SentinelDesk 🛡️ Enterprise Autonomous AI Platform · 14 Nodes · 83 Tests · Built for Rooman Technologies
         </footer>
       </div>
 
