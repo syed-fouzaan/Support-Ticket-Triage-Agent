@@ -59,9 +59,13 @@ async def agentic_react_node(state: TicketState) -> TicketState:
             executed_tool_calls.append({"tool": "issue_refund", "output": refund_res})
 
     else:
-        # Call Knowledge Base Search Tool
+        # Call Knowledge Base Search Tool & Autonomous Sandbox Repro Engine
         kb_info = await tool_search_knowledge_base(query=f"{subject} {body}")
         executed_tool_calls.append({"tool": "search_knowledge_base", "output": kb_info})
+
+        from backend.core.sandbox import execute_synthetic_sandbox_test
+        sandbox_res = execute_synthetic_sandbox_test(ticket_body=body, intent=intent)
+        executed_tool_calls.append({"tool": "synthetic_api_sandbox_test", "output": sandbox_res})
 
     # 3. Observation & Reflexion Step
     action_entry = {
