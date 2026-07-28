@@ -17,6 +17,7 @@ from backend.agents.intake_agent import intake_node
 from backend.agents.intent_agent import intent_node
 from backend.agents.rag_agent import rag_node
 from backend.agents.resolution_agent import resolution_node
+from backend.agents.translation_agent import translation_intake_node, translation_outbound_node
 from backend.agents.urgency_agent import urgency_node
 from backend.core.logging import get_logger
 from backend.graph.state import TicketState
@@ -39,8 +40,9 @@ def build_sentineldesk_graph():
     """Constructs and compiles the LangGraph StateGraph."""
     workflow = StateGraph(TicketState)
 
-    # 1. Add all 10 Nodes (including Cost Metering Node, CSAT Predictor Node & Autonomous ReAct Agent Node)
+    # 1. Add all 12 Nodes (including Multi-Lingual Translation Nodes)
     workflow.add_node("intake_step", intake_node)
+    workflow.add_node("translation_intake_step", translation_intake_node)
     workflow.add_node("intent_step", intent_node)
     workflow.add_node("urgency_step", urgency_node)
     workflow.add_node("duplicate_step", duplicate_node)
@@ -49,11 +51,13 @@ def build_sentineldesk_graph():
     workflow.add_node("resolution_step", resolution_node)
     workflow.add_node("csat_step", csat_node)
     workflow.add_node("cost_step", cost_node)
+    workflow.add_node("translation_outbound_step", translation_outbound_node)
     workflow.add_node("decision_step", decision_node)
 
     # 2. Wire Linear & Conditional Edges
     workflow.set_entry_point("intake_step")
-    workflow.add_edge("intake_step", "intent_step")
+    workflow.add_edge("intake_step", "translation_intake_step")
+    workflow.add_edge("translation_intake_step", "intent_step")
     workflow.add_edge("intent_step", "urgency_step")
     workflow.add_edge("urgency_step", "duplicate_step")
     workflow.add_edge("duplicate_step", "agentic_step")
@@ -63,7 +67,8 @@ def build_sentineldesk_graph():
     # Dynamic loopback conditional edge: Resolution -> RAG or CSAT
     workflow.add_conditional_edges("resolution_step", route_resolution)
     workflow.add_edge("csat_step", "cost_step")
-    workflow.add_edge("cost_step", "decision_step")
+    workflow.add_edge("cost_step", "translation_outbound_step")
+    workflow.add_edge("translation_outbound_step", "decision_step")
     workflow.add_edge("decision_step", END)
 
     app = workflow.compile()

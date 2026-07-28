@@ -60,6 +60,10 @@ class TicketState(TypedDict, total=False):
     total_tokens: int
     estimated_cost_usd: float
 
+    # Multi-Lingual Translation Node outputs
+    detected_language: str
+    native_resolution_draft: str
+
     # Decision Node outputs
     final_status: str  # OPEN, SOLVED, ESCALATED
     decision_reason: str
