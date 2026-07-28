@@ -49,3 +49,32 @@ async def websocket_live_triage(websocket: WebSocket):
                 await websocket.send_json({"type": "pong"})
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
+
+
+@router.websocket("/triage-stream/{ticket_id}")
+async def websocket_triage_stream(websocket: WebSocket, ticket_id: str):
+    """Streams live step-by-step agent reasoning thoughts for a specific ticket."""
+    await websocket.accept()
+    logger.info(f"Subscribed WebSocket streaming for ticket {ticket_id}")
+
+    steps = [
+        {"type": "NODE_START", "node": "intake_step", "text": "Intaking ticket payload & sanitizing PII..."},
+        {"type": "NODE_START", "node": "intent_step", "text": "Scoring intent & categorizing query domain..."},
+        {"type": "NODE_START", "node": "urgency_step", "text": "Evaluating customer tier & SLA urgency lane..."},
+        {"type": "NODE_START", "node": "duplicate_step", "text": "Vector semantic duplicate search in ChromaDB..."},
+        {"type": "NODE_START", "node": "rag_step", "text": "2-stage Cross-Encoder RAG retrieval & context grounding..."},
+        {"type": "NODE_START", "node": "resolution_step", "text": "Drafting native resolution & citing documentation..."},
+        {"type": "NODE_START", "node": "csat_step", "text": "Predicting expected CSAT star score & sentiment..."},
+        {"type": "NODE_START", "node": "decision_step", "text": "Evaluating confidence threshold & routing decision..."}
+    ]
+
+    try:
+        for s in steps:
+            await websocket.send_json({"ticket_id": ticket_id, **s})
+        
+        while True:
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_json({"type": "pong", "ticket_id": ticket_id})
+    except WebSocketDisconnect:
+        logger.info(f"Unsubscribed WebSocket stream for ticket {ticket_id}")

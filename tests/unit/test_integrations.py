@@ -39,3 +39,10 @@ def test_zendesk_webhook_ingestion():
     data = response.json()
     assert data["channel"] == "zendesk"
     assert data["org_id"] == "org_acme"
+
+
+def test_websocket_triage_stream():
+    with client.websocket_connect("/ws/triage-stream/TKT-WS-101") as websocket:
+        data = websocket.receive_json()
+        assert data["ticket_id"] == "TKT-WS-101"
+        assert "NODE_START" in data["type"]

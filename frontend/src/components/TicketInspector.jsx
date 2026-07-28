@@ -186,9 +186,15 @@ export default function TicketInspector({ ticket, onClose, onApprove, onEscalate
 
           {/* Append-Only Audit Log Timeline */}
           <div>
-            <div className="flex items-center space-x-2 mb-3">
-              <Clock className="w-4 h-4 text-slate-500" />
-              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Append-Only Audit Log Timeline</h3>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-slate-500" />
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Append-Only Audit Log Timeline</h3>
+              </div>
+              <span className="px-2.5 py-0.5 text-[10px] font-mono font-bold uppercase rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center space-x-1 animate-pulse">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>⚡ Live WS Stream Connected</span>
+              </span>
             </div>
 
             <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
