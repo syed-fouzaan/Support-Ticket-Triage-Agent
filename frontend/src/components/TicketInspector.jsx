@@ -214,13 +214,23 @@ export default function TicketInspector({ ticket, onClose, onApprove, onEscalate
 
         {/* Modal Footer Actions */}
         <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <button
-            onClick={() => onEscalate(ticket.id)}
-            className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition"
-          >
-            <AlertTriangle className="w-4 h-4" />
-            <span>Force Escalate to Human Tier 3</span>
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => onEscalate(ticket.id)}
+              className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              <span>Force Escalate</span>
+            </button>
+            <a
+              href={`http://localhost:8000/api/v1/tickets/${ticket.id}/export-audit`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center space-x-1 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition font-mono"
+            >
+              <span>📜 Audit Cert</span>
+            </a>
+          </div>
 
           <div className="flex items-center space-x-3">
             <button

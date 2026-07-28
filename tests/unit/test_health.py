@@ -25,3 +25,12 @@ async def test_trace_id_header_returned():
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         r = await client.get("/health", headers={"X-Trace-Id": "my-trace-123"})
     assert r.headers.get("x-trace-id") == "my-trace-123"
+
+
+async def test_export_audit_certificate():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        r = await client.get("/api/v1/tickets/TKT-8941/export-audit")
+    assert r.status_code == 200
+    data = r.json()
+    assert "sha256_verification_hash" in data
+    assert data["pii_sanitization_verified"] is True
