@@ -1,0 +1,37 @@
+{
+  "name": "SentinelDesk",
+  "short_name": "SentinelDesk",
+  "description": "Enterprise Autonomous AI Support Agent Platform — 14-Node LangGraph State Machine",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' fill='%230f172a'><rect width='192' height='192' rx='24' fill='%230f172a'/><text x='50%' y='55%' font-size='120' text-anchor='middle' dominant-baseline='middle'>🛡️</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%230f172a'><rect width='512' height='512' rx='64' fill='%230f172a'/><text x='50%' y='55%' font-size='320' text-anchor='middle' dominant-baseline='middle'>🛡️</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["productivity", "business", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Triage Operations",
+      "short_name": "Triage",
+      "description": "Open ticket triage queue",
+      "url": "/?tab=triage"
+    },
+    {
+      "name": "Analytics & SLA",
+      "short_name": "Analytics",
+      "description": "View live operational analytics",
+      "url": "/?tab=analytics"
+    }
+  ]
+}

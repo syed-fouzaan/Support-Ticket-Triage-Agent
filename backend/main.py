@@ -57,7 +57,9 @@ app.add_middleware(
 async def on_startup():
     import asyncio
     from backend.core.sla_worker import run_sla_escalation_worker
+    from backend.core.email_digest import run_email_digest_scheduler
     asyncio.create_task(run_sla_escalation_worker(30.0))
+    asyncio.create_task(run_email_digest_scheduler(24.0))
 
 
 # ── Trace ID & Security Headers middleware ─────────────────────────────────────

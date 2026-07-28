@@ -55,6 +55,16 @@ export default function Header({
           >
             Analytics & SLA
           </button>
+          <button
+            onClick={() => setActiveTab('kanban')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'kanban'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
+            }`}
+          >
+            Kanban Board
+          </button>
         </div>
 
         {/* Right Status & Action Pills */}

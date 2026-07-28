@@ -8,6 +8,7 @@ import CustomerPortalModal from './components/CustomerPortalModal';
 import SecurityAuditView from './components/SecurityAuditView';
 import KnowledgeBaseView from './components/KnowledgeBaseView';
 import AnalyticsView from './components/AnalyticsView';
+import KanbanView from './components/KanbanView';
 
 import { Agentation } from 'agentation';
 
@@ -230,6 +231,10 @@ export default function App() {
 
           {activeTab === 'analytics' && (
             <AnalyticsView />
+          )}
+
+          {activeTab === 'kanban' && (
+            <KanbanView tickets={tickets} onTicketMove={(t) => console.log('Moved:', t)} />
           )}
 
         </main>
