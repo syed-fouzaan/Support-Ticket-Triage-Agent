@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from backend.graph.workflow import run_ticket_triage_graph
 from backend.core.logging import get_logger
+from backend.security.crypto import encrypt_payload, decrypt_payload
 
 logger = get_logger(__name__)
 
@@ -57,6 +58,7 @@ async def create_ticket(req: CreateTicketRequest):
             "customer_id": final_state["customer_id"],
             "customer_name": final_state["customer_name"],
             "customer_email": final_state["customer_email"],
+            "encrypted_email": encrypt_payload(final_state["customer_email"]),
             "customer_tier": final_state["customer_tier"],
             "subject": final_state["subject"],
             "body": final_state["body"],
