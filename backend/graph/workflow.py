@@ -8,12 +8,14 @@ from typing import Dict, Any
 
 from langgraph.graph import END, StateGraph
 
+from backend.agents.action_executor_agent import action_executor_node
 from backend.agents.agentic_loop import agentic_react_node
+from backend.agents.clustering_agent import clustering_node
 from backend.agents.cost_agent import cost_node
 from backend.agents.csat_agent import csat_node
 from backend.agents.decision_node import decision_node
-from backend.agents.clustering_agent import clustering_node
 from backend.agents.duplicate_agent import duplicate_node
+from backend.agents.evaluator_agent import evaluator_node
 from backend.agents.exemplar_agent import exemplar_synthesizer_node
 from backend.agents.intake_agent import intake_node
 from backend.agents.intent_agent import intent_node
@@ -35,14 +37,14 @@ def route_resolution(state: TicketState) -> str:
     if confidence < 0.60 and retry_count < 2:
         logger.info(f"Dynamic loopback: Resolution confidence ({confidence:.2f}) < 0.60. Retrying RAG node (attempt {retry_count + 1}).")
         return "rag_step"
-    return "csat_step"
+    return "evaluator_step"
 
 
 def build_sentineldesk_graph():
     """Constructs and compiles the LangGraph StateGraph."""
     workflow = StateGraph(TicketState)
 
-    # 1. Add all 14 Nodes (including Clustering Node and Few-Shot Exemplar Synthesizer)
+    # 1. Add all 16 Nodes (including Action Executor Node 15 and Evaluator Node 16)
     workflow.add_node("intake_step", intake_node)
     workflow.add_node("translation_intake_step", translation_intake_node)
     workflow.add_node("intent_step", intent_node)
@@ -53,6 +55,8 @@ def build_sentineldesk_graph():
     workflow.add_node("agentic_step", agentic_react_node)
     workflow.add_node("rag_step", rag_node)
     workflow.add_node("resolution_step", resolution_node)
+    workflow.add_node("evaluator_step", evaluator_node)
+    workflow.add_node("action_executor_step", action_executor_node)
     workflow.add_node("csat_step", csat_node)
     workflow.add_node("cost_step", cost_node)
     workflow.add_node("translation_outbound_step", translation_outbound_node)
@@ -70,8 +74,10 @@ def build_sentineldesk_graph():
     workflow.add_edge("agentic_step", "rag_step")
     workflow.add_edge("rag_step", "resolution_step")
     
-    # Dynamic loopback conditional edge: Resolution -> RAG or CSAT
+    # Dynamic loopback conditional edge: Resolution -> RAG or Evaluator
     workflow.add_conditional_edges("resolution_step", route_resolution)
+    workflow.add_edge("evaluator_step", "action_executor_step")
+    workflow.add_edge("action_executor_step", "csat_step")
     workflow.add_edge("csat_step", "cost_step")
     workflow.add_edge("cost_step", "translation_outbound_step")
     workflow.add_edge("translation_outbound_step", "decision_step")

@@ -1,7 +1,7 @@
 # SentinelDesk 🛡️ — 100/100 Enterprise Autonomous AI Agent Platform
-### Multi-Agent Support Operations Platform with 14-Node LangGraph State Machine
+### Multi-Agent Support Operations Platform with 16-Node LangGraph State Machine
 
-> **Enterprise Grade · GraphRAG · RBAC · PWA · OTEL Tracing · 14 Autonomous Nodes · Kanban Board · 83/83 Passing Tests**
+> **Enterprise Grade · GraphRAG · RBAC · PWA · OTEL Tracing · 16 Autonomous Nodes · WebRTC Voice Simulator · SOC2 PDF Audit · 90/90 Passing Tests**
 
 SentinelDesk is an autonomous multi-agent platform that automates the full lifecycle of customer support tickets — intake, intent classification, few-shot exemplar synthesis, urgency scoring, duplicate detection, autonomous ReAct tool execution, GraphRAG semantic vector retrieval, resolution drafting, CSAT prediction, cost metering, multi-lingual translation, and confidence-gated decisioning — while providing live WebSocket telemetry, RBAC role enforcement, and zero-trust security.
 

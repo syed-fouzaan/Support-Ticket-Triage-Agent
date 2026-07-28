@@ -10,6 +10,8 @@ import KnowledgeBaseView from './components/KnowledgeBaseView';
 import AnalyticsView from './components/AnalyticsView';
 import KanbanView from './components/KanbanView';
 
+import VoiceCallSimulatorModal from './components/VoiceCallSimulatorModal';
+
 import { Agentation } from 'agentation';
 
 import { MOCK_TICKETS, MOCK_METRICS } from './mockData';
@@ -20,6 +22,7 @@ export default function App() {
   const [metrics, setMetrics] = useState(MOCK_METRICS);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [showNewTicketModal, setShowNewTicketModal] = useState(false);
+  const [showVoiceModal, setShowVoiceModal] = useState(false);
   const [apiOnline, setApiOnline] = useState(false);
 
   // Poll backend health, tickets, and analytics metrics
@@ -205,6 +208,7 @@ export default function App() {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
             onNewTicket={() => setShowNewTicketModal(true)}
+            onOpenVoiceCall={() => setShowVoiceModal(true)}
             apiOnline={apiOnline}
             metrics={metrics}
             onRefresh={fetchData}
@@ -259,6 +263,13 @@ export default function App() {
       {showNewTicketModal && (
         <CustomerPortalModal 
           onClose={() => setShowNewTicketModal(false)}
+          onSubmitTicket={handleCreateTicket}
+        />
+      )}
+
+      {showVoiceModal && (
+        <VoiceCallSimulatorModal
+          onClose={() => setShowVoiceModal(false)}
           onSubmitTicket={handleCreateTicket}
         />
       )}

@@ -69,6 +69,13 @@ class TicketState(TypedDict, total=False):
     decision_reason: str
     assigned_team: Optional[str]
 
+    # Wave 8 State Fields
+    churn_risk_score: float
+    churn_risk_level: str
+    executed_actions: List[Dict[str, Any]]
+    evaluation_metrics: Dict[str, Any]
+    certificate_id: str
+
     # Audit Trail & Agentic Tool Execution
     executed_tool_calls: List[Dict[str, Any]]
     audit_trail: List[Dict[str, Any]]

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Phone } from 'lucide-react';
 
 const TABS = [
   { id: 'triage',    label: 'Triage Operations' },
@@ -9,7 +9,7 @@ const TABS = [
   { id: 'kanban',    label: 'Kanban Board' },
 ];
 
-export default function Header({ activeTab, setActiveTab, onNewTicket, apiOnline, onRefresh }) {
+export default function Header({ activeTab, setActiveTab, onNewTicket, onOpenVoiceCall, apiOnline, onRefresh }) {
   return (
     <header style={{
       background: '#ffffff',
@@ -68,6 +68,21 @@ export default function Header({ activeTab, setActiveTab, onNewTicket, apiOnline
             <span style={{ color: '#cbd5e0', margin: '0 2px' }}>|</span>
             <span style={{ fontWeight: 700, color: '#1a202c', fontSize: 11 }}>🏢 Org: Acme Corp</span>
           </div>
+
+          {/* Voice Simulator */}
+          <button
+            onClick={onOpenVoiceCall}
+            title="Open WebRTC Voice Simulator"
+            style={{
+              background: '#eff6ff', border: '1px solid #bfdbfe', color: '#2563eb',
+              borderRadius: 8, padding: '6px 12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700,
+              transition: 'background 0.15s',
+            }}
+          >
+            <Phone size={13} />
+            Voice Bot
+          </button>
 
           {/* Refresh */}
           <button
