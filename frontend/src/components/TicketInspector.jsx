@@ -21,6 +21,9 @@ export default function TicketInspector({ ticket, onClose, onApprove, onEscalate
             <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded bg-amber-100 text-amber-800 border border-amber-300">
               {ticket.customer_tier}
             </span>
+            <span className="px-2 py-0.5 text-[10px] font-mono font-bold uppercase rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+              🌐 Lang: {(ticket.language || 'en').toUpperCase()}
+            </span>
           </div>
 
           <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition">

@@ -28,10 +28,19 @@ async def resolution_node(state: TicketState) -> TicketState:
     intent = state.get("intent", "GeneralQuery")
 
     # Safe grounded resolution template fallback
+    lang = state.get("language", "en")
     doc_titles = [s.get("title", "") for s in rag_sources if s.get("title")]
     sources_text = ", ".join(doc_titles) if doc_titles else "General Support Guidelines"
     
-    draft = f"Thank you for reaching out regarding '{subject}'. Based on our official support records ({sources_text}), we have logged your issue under {intent} category and applied standard resolution procedures."
+    if lang == "es":
+        draft = f"Gracias por contactar con soporte en relación a '{subject}'. Según nuestros registros oficiales ({sources_text}), hemos registrado su consulta bajo la categoría {intent} y aplicado el protocolo de resolución correspondiente."
+    elif lang == "de":
+        draft = f"Vielen Dank für Ihre Anfrage zu '{subject}'. Gemäß unseren Support-Richtlinien ({sources_text}) haben wir Ihr Anliegen unter {intent} erfasst und bearbeitet."
+    elif lang == "fr":
+        draft = f"Merci d'avoir contacté le support concernant '{subject}'. Conformément à nos documents ({sources_text}), nous avons traité votre demande sous la catégorie {intent}."
+    else:
+        draft = f"Thank you for reaching out regarding '{subject}'. Based on our official support records ({sources_text}), we have logged your issue under {intent} category and applied standard resolution procedures."
+
     confidence = 0.88
     requires_human = False
     cited = [s.get("id", "kb-01") for s in rag_sources]
