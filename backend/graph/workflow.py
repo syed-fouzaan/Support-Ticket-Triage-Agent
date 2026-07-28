@@ -13,6 +13,7 @@ from backend.agents.cost_agent import cost_node
 from backend.agents.csat_agent import csat_node
 from backend.agents.decision_node import decision_node
 from backend.agents.duplicate_agent import duplicate_node
+from backend.agents.exemplar_agent import exemplar_synthesizer_node
 from backend.agents.intake_agent import intake_node
 from backend.agents.intent_agent import intent_node
 from backend.agents.rag_agent import rag_node
@@ -40,10 +41,11 @@ def build_sentineldesk_graph():
     """Constructs and compiles the LangGraph StateGraph."""
     workflow = StateGraph(TicketState)
 
-    # 1. Add all 12 Nodes (including Multi-Lingual Translation Nodes)
+    # 1. Add all 13 Nodes (including Dynamic Few-Shot Exemplar Auto-Synthesizer Node)
     workflow.add_node("intake_step", intake_node)
     workflow.add_node("translation_intake_step", translation_intake_node)
     workflow.add_node("intent_step", intent_node)
+    workflow.add_node("exemplar_step", exemplar_synthesizer_node)
     workflow.add_node("urgency_step", urgency_node)
     workflow.add_node("duplicate_step", duplicate_node)
     workflow.add_node("agentic_step", agentic_react_node)
@@ -58,7 +60,8 @@ def build_sentineldesk_graph():
     workflow.set_entry_point("intake_step")
     workflow.add_edge("intake_step", "translation_intake_step")
     workflow.add_edge("translation_intake_step", "intent_step")
-    workflow.add_edge("intent_step", "urgency_step")
+    workflow.add_edge("intent_step", "exemplar_step")
+    workflow.add_edge("exemplar_step", "urgency_step")
     workflow.add_edge("urgency_step", "duplicate_step")
     workflow.add_edge("duplicate_step", "agentic_step")
     workflow.add_edge("agentic_step", "rag_step")

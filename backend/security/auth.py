@@ -60,3 +60,28 @@ def check_rate_limit(client_ip: str, max_requests: int = 100, window_sec: int = 
             detail=f"Rate limit exceeded. Maximum {max_requests} requests per {window_sec} seconds."
         )
     return True
+
+
+# Role Hierarchy: Admin > Operator > Auditor
+_ROLE_HIERARCHY = {
+    "Admin": 3,
+    "Operator": 2,
+    "Auditor": 1,
+}
+
+
+def verify_rbac_permission(required_role: str = "Operator", x_user_role: Optional[str] = Header("Operator")) -> str:
+    """
+    Validates user RBAC role permissions against required endpoint role.
+    """
+    user_role = x_user_role or "Operator"
+    user_level = _ROLE_HIERARCHY.get(user_role, 1)
+    required_level = _ROLE_HIERARCHY.get(required_role, 2)
+
+    if user_level < required_level:
+        logger.warning(f"RBAC Permission Denied: Role '{user_role}' attempted access to '{required_role}' resource.")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"Insufficient RBAC permissions. Role '{required_role}' required."
+        )
+    return user_role

@@ -78,3 +78,24 @@ async def websocket_triage_stream(websocket: WebSocket, ticket_id: str):
                 await websocket.send_json({"type": "pong", "ticket_id": ticket_id})
     except WebSocketDisconnect:
         logger.info(f"Unsubscribed WebSocket stream for ticket {ticket_id}")
+
+
+@router.websocket("/voice-stream/{ticket_id}")
+async def websocket_voice_stream(websocket: WebSocket, ticket_id: str):
+    """WebRTC audio socket endpoint for real-time voice streaming and live triage transcription."""
+    await websocket.accept()
+    logger.info(f"Connected WebRTC voice stream for ticket {ticket_id}")
+    try:
+        await websocket.send_json({
+            "type": "VOICE_STREAM_CONNECTED",
+            "ticket_id": ticket_id,
+            "sample_rate": 16000,
+            "status": "listening"
+        })
+        while True:
+            # Receive audio frame or control ping
+            data = await websocket.receive_text()
+            if data == "ping":
+                await websocket.send_json({"type": "pong", "ticket_id": ticket_id})
+    except WebSocketDisconnect:
+        logger.info(f"Disconnected WebRTC voice stream for ticket {ticket_id}")

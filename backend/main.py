@@ -52,6 +52,14 @@ app.add_middleware(
 )
 
 
+# ── Startup Lifecycle ────────────────────────────────────────────────────────
+@app.on_event("startup")
+async def on_startup():
+    import asyncio
+    from backend.core.sla_worker import run_sla_escalation_worker
+    asyncio.create_task(run_sla_escalation_worker(30.0))
+
+
 # ── Trace ID & Security Headers middleware ─────────────────────────────────────
 @app.middleware("http")
 async def security_headers_middleware(request: Request, call_next):
