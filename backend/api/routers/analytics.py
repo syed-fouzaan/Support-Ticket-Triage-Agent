@@ -21,3 +21,13 @@ async def get_summary_metrics():
         "active_llm_provider": f"{settings.LLM_PROVIDER.capitalize()} {settings.LLM_MODEL}",
         "owasp_blocked_attempts": 14,
     }
+
+
+@router.post("/sla-check")
+async def trigger_sla_check():
+    """Triggers an on-demand SLA breach check across active tickets."""
+    from backend.api.routers.tickets import _IN_MEMORY_TICKETS
+    from backend.core.sla_engine import check_and_escalate_sla_breaches
+    
+    res = check_and_escalate_sla_breaches(_IN_MEMORY_TICKETS)
+    return res
