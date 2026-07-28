@@ -18,7 +18,7 @@ async def run_sla_escalation_worker(interval_seconds: float = 30.0) -> NoReturn:
     Active SLA Background Daemon Loop.
     Runs indefinitely during FastAPI application lifespan.
     """
-    logger.info(f"⏱️ SLA Escalation Worker Daemon initialized (polling every {interval_seconds}s)")
+    logger.info(f"[SLA Daemon] SLA Escalation Worker Daemon initialized (polling every {interval_seconds}s)")
     while True:
         try:
             res = check_and_escalate_sla_breaches(_IN_MEMORY_TICKETS)

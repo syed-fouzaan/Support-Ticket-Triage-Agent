@@ -56,7 +56,7 @@ async def run_email_digest_scheduler(interval_hours: float = 24.0) -> NoReturn:
     Generates and logs summary digest reports on a configurable interval.
     In production: integrate with SMTP, SendGrid, or AWS SES to deliver via email.
     """
-    logger.info(f"📨 Email Digest Scheduler initialized (interval={interval_hours}h)")
+    logger.info(f"[Email Digest] Email Digest Scheduler initialized (interval={interval_hours}h)")
     while True:
         await asyncio.sleep(interval_hours * 3600)
         try:
