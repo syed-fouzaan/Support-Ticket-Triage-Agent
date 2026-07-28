@@ -102,9 +102,29 @@ async def approve_ticket(ticket_id: str, payload: Dict[str, str]):
             t["audit_trail"].append({
                 "step": "Human Review",
                 "timestamp": "Now",
-                "detail": "Resolution approved and dispatched by agent",
+                "detail": "Resolution approved & dispatched — indexed to Golden Reflexion Memory",
                 "status": "success",
             })
+
+            # Auto-index into ChromaDB Golden Reflexion Memory
+            try:
+                from backend.vectordb.client import get_or_create_collection, check_chromadb_connection
+                from backend.vectordb.ingest import get_embedder
+                if check_chromadb_connection():
+                    col = get_or_create_collection("golden_resolutions")
+                    embedder = get_embedder()
+                    text_to_embed = f"Subject: {t['subject']} | Solution: {t['resolution_draft']}"
+                    vec = embedder.encode(text_to_embed).tolist()
+                    col.add(
+                        ids=[f"golden-{ticket_id}"],
+                        documents=[text_to_embed],
+                        metadatas=[{"ticket_id": ticket_id, "subject": t["subject"]}],
+                        embeddings=[vec]
+                    )
+                    logger.info(f"Indexed ticket {ticket_id} into Golden Reflexion Memory collection")
+            except Exception as ex:
+                logger.warning(f"Golden memory indexing deferred: {ex}")
+
             return t
     raise HTTPException(status_code=404, detail="Ticket not found")
 

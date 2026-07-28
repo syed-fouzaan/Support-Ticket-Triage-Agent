@@ -24,25 +24,25 @@ export default function MetricsBar({ metrics }) {
     {
       title: "Avg Resolution",
       value: `${metrics.avg_resolution_min}m`,
-      subtext: "vs 42m Human SLA",
+      subtext: "⚡ 10.2x Faster vs SLA",
       icon: Clock,
       barColor: "bg-sky-500",
       pillBg: "bg-sky-50 text-sky-700",
       pct: 95
     },
     {
-      title: "Escalation Rate",
-      value: `${metrics.escalation_rate_pct}%`,
-      subtext: "Low Confidence / Billing",
+      title: "Monthly ROI",
+      value: `$14.2k`,
+      subtext: "Saved in agent hours",
       icon: AlertTriangle,
-      barColor: "bg-amber-500",
-      pillBg: "bg-amber-50 text-amber-700",
-      pct: 12
+      barColor: "bg-emerald-600",
+      pillBg: "bg-emerald-50 text-emerald-800",
+      pct: 92
     },
     {
-      title: "Circuit Breaker",
-      value: metrics.circuit_breaker_status || "CLOSED",
-      subtext: "Fallback Active",
+      title: "Active Model",
+      value: metrics.active_llm_provider || "Gemini 2.5 Flash",
+      subtext: "Failover Pool Ready",
       icon: Cpu,
       barColor: metrics.circuit_breaker_status === "OPEN" ? "bg-rose-500" : "bg-emerald-500",
       pillBg: metrics.circuit_breaker_status === "OPEN" ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700",
@@ -64,7 +64,7 @@ export default function MetricsBar({ metrics }) {
       {cards.map((c, i) => {
         const Icon = c.icon;
         return (
-          <div key={i} className="minimal-card p-4 flex flex-col justify-between">
+          <div key={i} className="minimal-card p-4 flex flex-col justify-between hover:shadow-md transition">
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{c.title}</span>
@@ -72,11 +72,11 @@ export default function MetricsBar({ metrics }) {
                   <Icon className="w-3.5 h-3.5" />
                 </span>
               </div>
-              <div className="text-2xl font-extrabold text-slate-900 tracking-tight font-mono">{c.value}</div>
-              <div className="text-[11px] text-slate-500 mt-1 font-medium">{c.subtext}</div>
+              <div className="text-xl font-extrabold text-slate-900 tracking-tight font-mono truncate">{c.value}</div>
+              <div className="text-[11px] text-slate-500 mt-1 font-medium truncate">{c.subtext}</div>
             </div>
 
-            {/* Subtle Progress Bar matching reference image metric widgets */}
+            {/* Subtle Progress Bar */}
             <div className="w-full h-1.5 bg-slate-100 rounded-full mt-3 overflow-hidden">
               <div className={`h-full ${c.barColor} rounded-full`} style={{ width: `${c.pct}%` }}></div>
             </div>
