@@ -91,6 +91,8 @@ export default function CustomerPortalModal({ onClose, onSubmitTicket }) {
                 className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-slate-400 font-medium"
               >
                 <option value="web">Web Portal</option>
+                <option value="slack">Slack Integration</option>
+                <option value="zendesk">Zendesk Webhook</option>
                 <option value="email">Email Connector</option>
                 <option value="api">REST API</option>
               </select>
