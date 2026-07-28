@@ -79,6 +79,11 @@ async def create_ticket(req: CreateTicketRequest):
         }
 
         _IN_MEMORY_TICKETS.insert(0, ticket_record)
+        
+        # Enqueue outbound multi-channel webhook dispatching in background
+        from backend.core.webhook_dispatcher import dispatch_ticket_resolution_events
+        background_tasks.add_task(dispatch_ticket_resolution_events, ticket_record)
+
         return ticket_record
     except Exception as e:
         logger.error(f"Error executing agent graph: {e}")
