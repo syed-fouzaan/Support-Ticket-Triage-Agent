@@ -31,7 +31,7 @@ class CreateTicketRequest(BaseModel):
 
 
 @router.post("", status_code=201)
-async def create_ticket(req: CreateTicketRequest):
+async def create_ticket(req: CreateTicketRequest, background_tasks: BackgroundTasks):
     """
     Submits a new support ticket and executes the full LangGraph multi-agent pipeline:
     Intake → Intent → Urgency → Duplicate → RAG → Resolution → Decision
