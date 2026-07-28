@@ -93,11 +93,14 @@ uv venv .venv311 --python 3.11
 .venv311\Scripts\activate
 pip install -r support-agent/backend/requirements.txt
 
-# 2. Run Full Automated Test Suite (69 Tests)
+# 2. Run Full Automated Test Suite (90 Tests)
 python -m pytest tests/unit tests/security tests/integration
 
-# 3. Launch Development Server
+# 3. Launch Development Server (Execute from support-agent root directory)
+cd support-agent
 python -m uvicorn backend.main:app --reload --port 8000
+# Or if working inside the backend/ folder:
+# python -m uvicorn main:app --reload --port 8000
 
 # 4. Launch Production Docker Environment
 docker-compose up --build
