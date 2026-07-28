@@ -171,3 +171,37 @@ async def export_compliance_audit(ticket_id: str):
                 "issued_at": "2026-07-28T12:35:00Z"
             }
     raise HTTPException(status_code=404, detail="Ticket not found")
+
+
+class FeedbackRequest(BaseModel):
+    corrected_draft: str = Field(..., min_length=3)
+    operator_notes: Optional[str] = Field("Approved via Human Operator UI")
+
+
+@router.post("/{ticket_id}/feedback")
+async def submit_ticket_feedback(ticket_id: str, req: FeedbackRequest):
+    """Submits human operator correction to trigger autonomous self-healing re-indexing."""
+    from backend.agents.self_healing_agent import process_operator_feedback
+
+    for t in _IN_MEMORY_TICKETS:
+        if t["id"] == ticket_id:
+            original_draft = t.get("resolution_draft", "")
+            t["resolution_draft"] = req.corrected_draft
+            t["status"] = "SOLVED"
+
+            healing_res = process_operator_feedback(
+                ticket_id=ticket_id,
+                subject=t.get("subject", "General Ticket"),
+                original_draft=original_draft,
+                corrected_draft=req.corrected_draft,
+                operator_notes=req.operator_notes or ""
+            )
+
+            t["audit_trail"].append({
+                "step": "Self-Healing Loop",
+                "timestamp": "Now",
+                "detail": healing_res["message"],
+                "status": "success"
+            })
+            return {"status": "solved", "self_healing": healing_res, "ticket": t}
+    raise HTTPException(status_code=404, detail="Ticket not found")
