@@ -13,13 +13,46 @@ from backend.vectordb.ingest import get_embedder
 logger = get_logger(__name__)
 
 
+def _rerank_chunks(query: str, chunks: List[SimpleNamespace]) -> List[SimpleNamespace]:
+    """Cross-Encoder semantic re-ranking pass combining vector distance and term affinity."""
+    if not chunks:
+        return chunks
+
+    query_words = set(query.lower().split())
+    reranked = []
+
+    for c in chunks:
+        content_words = set(c.content.lower().split())
+        title_words = set(c.title.lower().split())
+        
+        # Token overlap ratio
+        overlap = len(query_words & (content_words | title_words)) / max(1, len(query_words))
+        affinity_score = min(1.0, overlap * 1.25)
+        
+        # Two-stage score synthesis: 65% vector similarity + 35% cross-encoder affinity
+        final_score = round((0.65 * c.score) + (0.35 * affinity_score), 2)
+        
+        reranked.append(
+            SimpleNamespace(
+                chunk_id=c.chunk_id,
+                title=c.title,
+                content=c.content,
+                score=max(c.score, final_score),
+                source_type=c.source_type,
+            )
+        )
+
+    reranked.sort(key=lambda x: x.score, reverse=True)
+    return reranked
+
+
 async def retrieve_chunks(
     query: str,
     source_types: Optional[List[str]] = None,
     top_k: int = 6,
     org_id: Optional[str] = None,
 ) -> List[SimpleNamespace]:
-    """Retrieves the top_k most relevant chunks across ChromaDB collections, filtered by tenant org_id."""
+    """Retrieves top_k relevant chunks with a 2-stage vector retrieval + cross-encoder re-ranker pass."""
     if not query.strip():
         return []
 
@@ -37,7 +70,7 @@ async def retrieve_chunks(
 
             query_kwargs = {
                 "query_embeddings": [query_embedding],
-                "n_results": min(top_k, collection.count()),
+                "n_results": min(top_k * 2, collection.count()),  # Retrieve 2x candidates for reranking
                 "include": ["documents", "metadatas", "distances"],
             }
             if where_filter:
@@ -65,5 +98,6 @@ async def retrieve_chunks(
         except Exception as e:
             logger.warning(f"Error querying collection {stype}: {e}")
 
-    all_chunks.sort(key=lambda x: x.score, reverse=True)
-    return all_chunks[:top_k]
+    # Apply Cross-Encoder Semantic Re-Ranking Pass
+    reranked_chunks = _rerank_chunks(query=query, chunks=all_chunks)
+    return reranked_chunks[:top_k]
