@@ -54,7 +54,7 @@ def seed_vector_database_if_empty():
                 collection.add(
                     ids=[doc["id"]],
                     documents=[doc["content"]],
-                    metadatas=[{"title": doc["title"], "source_type": stype}],
+                    metadatas=[{"title": doc["title"], "source_type": stype, "org_id": "org_enterprise_default"}],
                     embeddings=[embedding],
                 )
                 logger.info(f"Seeded ChromaDB collection '{stype}' with doc '{doc['id']}'")

@@ -17,14 +17,17 @@ async def retrieve_chunks(
     query: str,
     source_types: Optional[List[str]] = None,
     top_k: int = 6,
+    org_id: Optional[str] = None,
 ) -> List[SimpleNamespace]:
-    """Retrieves the top_k most relevant chunks across ChromaDB collections."""
+    """Retrieves the top_k most relevant chunks across ChromaDB collections, filtered by tenant org_id."""
     if not query.strip():
         return []
 
     source_types = source_types or list(COLLECTIONS.keys())
     query_embedding = get_embedder().encode(query).tolist()
     all_chunks: List[SimpleNamespace] = []
+    
+    where_filter = {"org_id": org_id} if org_id else None
 
     for stype in source_types:
         try:
@@ -32,11 +35,15 @@ async def retrieve_chunks(
             if collection.count() == 0:
                 continue
 
-            res = collection.query(
-                query_embeddings=[query_embedding],
-                n_results=min(top_k, collection.count()),
-                include=["documents", "metadatas", "distances"],
-            )
+            query_kwargs = {
+                "query_embeddings": [query_embedding],
+                "n_results": min(top_k, collection.count()),
+                "include": ["documents", "metadatas", "distances"],
+            }
+            if where_filter:
+                query_kwargs["where"] = where_filter
+
+            res = collection.query(**query_kwargs)
 
             for cid, doc, meta, dist in zip(
                 res.get("ids", [[]])[0],

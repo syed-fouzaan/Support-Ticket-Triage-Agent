@@ -19,6 +19,7 @@ _IN_MEMORY_TICKETS: List[Dict[str, Any]] = []
 
 
 class CreateTicketRequest(BaseModel):
+    org_id: Optional[str] = Field("org_enterprise_default")
     customer_id: Optional[str] = Field("cus_web_user")
     customer_name: Optional[str] = Field("Jane Doe")
     customer_email: str = Field("jane@example.com")
@@ -36,6 +37,7 @@ async def create_ticket(req: CreateTicketRequest):
     """
     initial_state = {
         "ticket_id": f"TKT-{len(_IN_MEMORY_TICKETS) + 8945}",
+        "org_id": req.org_id or "org_enterprise_default",
         "customer_id": req.customer_id,
         "customer_name": req.customer_name,
         "customer_email": req.customer_email,
@@ -51,6 +53,7 @@ async def create_ticket(req: CreateTicketRequest):
         
         ticket_record = {
             "id": final_state["ticket_id"],
+            "org_id": final_state.get("org_id", "org_enterprise_default"),
             "customer_id": final_state["customer_id"],
             "customer_name": final_state["customer_name"],
             "customer_email": final_state["customer_email"],

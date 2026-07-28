@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 class TicketState(TypedDict, total=False):
     # Inbound Payload
     ticket_id: str
+    org_id: str
     customer_id: str
     customer_name: str
     customer_email: str

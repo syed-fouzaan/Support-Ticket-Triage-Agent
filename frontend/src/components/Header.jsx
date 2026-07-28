@@ -57,7 +57,9 @@ export default function Header({
             </span>
             <span className="text-slate-700 font-semibold text-xs">{apiOnline ? 'FastAPI Active' : 'Standalone Demo'}</span>
             <span className="text-slate-300">|</span>
-            <span className="text-indigo-600 font-mono text-[11px] font-bold">{metrics.active_llm_provider || 'Gemini 2.5'}</span>
+            <span className="text-slate-900 font-mono text-[11px] font-extrabold flex items-center">
+              🏢 Org: Acme Corp
+            </span>
           </div>
 
           <button

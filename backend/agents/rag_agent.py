@@ -25,7 +25,7 @@ async def rag_node(state: TicketState) -> TicketState:
             
             # Map intent to relevant ChromaDB source types
             source_types = ["faq", "policy"] if intent == "Billing" else ["manual", "faq", "guide"]
-            chunks = await retrieve_chunks(query=query, source_types=source_types, top_k=6)
+            chunks = await retrieve_chunks(query=query, source_types=source_types, top_k=6, org_id=state.get("org_id"))
             
             for c in chunks[:3]:  # Top-3 reranked
                 retrieved_chunks.append({
