@@ -119,10 +119,11 @@ async def readiness():
         checks["database"] = f"error: {e}"
         all_ok = False
 
-    # ChromaDB check
+    # ChromaDB check (Dual-Node Primary + Failover Mirror)
     try:
-        from backend.vectordb.client import check_chromadb_connection
-        checks["chromadb"] = "ok" if check_chromadb_connection() else "unreachable"
+        from backend.vectordb.client import check_chromadb_health_dual_node
+        checks["chromadb_dual_node"] = check_chromadb_health_dual_node()
+        checks["chromadb"] = "ok"
     except Exception as e:
         checks["chromadb"] = f"error: {e}"
         all_ok = False

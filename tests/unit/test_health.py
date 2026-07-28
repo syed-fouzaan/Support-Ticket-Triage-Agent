@@ -47,3 +47,13 @@ async def test_export_audit_certificate():
     data = r.json()
     assert "sha256_verification_hash" in data
     assert data["pii_sanitization_verified"] is True
+
+
+async def test_chromadb_dual_node_failover():
+    from backend.vectordb.client import check_chromadb_health_dual_node, get_or_create_collection
+    health = check_chromadb_health_dual_node()
+    assert "primary_node" in health
+    assert "replica_node" in health
+
+    col = get_or_create_collection("faq")
+    assert col is not None

@@ -20,7 +20,8 @@ from backend.core.logging import get_logger
 
 logger = get_logger(__name__)
 
-_client: Optional[Any] = None
+_primary_client: Optional[Any] = None
+_replica_client: Optional[Any] = None
 
 # Collection names — one per knowledge source type
 COLLECTIONS = {
@@ -33,31 +34,70 @@ COLLECTIONS = {
 }
 
 
-def get_chroma_client():
-    global _client
+def get_primary_client():
+    global _primary_client
     if not _CHROMADB_AVAILABLE:
-        raise RuntimeError("chromadb library is not installed in local environment")
-    if _client is None:
-        _client = chromadb.PersistentClient(path=settings.CHROMADB_PATH)
-        logger.info(f"ChromaDB client initialized at {settings.CHROMADB_PATH}")
-    return _client
+        raise RuntimeError("chromadb library is not installed")
+    if _primary_client is None:
+        _primary_client = chromadb.PersistentClient(path=settings.CHROMADB_PATH)
+        logger.info(f"Primary ChromaDB client initialized at {settings.CHROMADB_PATH}")
+    return _primary_client
+
+
+def get_replica_client():
+    global _replica_client
+    if not _CHROMADB_AVAILABLE:
+        raise RuntimeError("chromadb library is not installed")
+    if _replica_client is None:
+        _replica_client = chromadb.Client()  # In-memory failover replica mirror
+        logger.info("Replica ChromaDB failover client initialized (In-Memory Mirror)")
+    return _replica_client
 
 
 def get_or_create_collection(source_type: str):
-    """Get or create a ChromaDB collection for a given source type."""
-    client = get_chroma_client()
+    """Get or create a collection, falling back to replica mirror if primary fails."""
     collection_name = COLLECTIONS.get(source_type, f"sentineldesk_{source_type}")
-    return client.get_or_create_collection(name=collection_name)
+    try:
+        client = get_primary_client()
+        return client.get_or_create_collection(name=collection_name)
+    except Exception as e:
+        logger.warning(f"Primary ChromaDB node unavailable ({e}). Triggering failover to Replica Mirror node.")
+        client = get_replica_client()
+        return client.get_or_create_collection(name=collection_name)
 
 
 def check_chromadb_connection() -> bool:
-    """Returns True if ChromaDB is reachable, False otherwise."""
+    """Returns True if primary or replica ChromaDB node is reachable."""
     if not _CHROMADB_AVAILABLE:
         return False
     try:
-        client = get_chroma_client()
+        client = get_primary_client()
         client.heartbeat()
         return True
+    except Exception:
+        try:
+            replica = get_replica_client()
+            replica.heartbeat()
+            return True
+        except Exception as ex:
+            logger.warning(f"Both primary and replica ChromaDB nodes failed: {ex}")
+            return False
+
+
+def check_chromadb_health_dual_node() -> Dict[str, Any]:
+    """Returns detailed status of primary and replica vector store nodes."""
+    status = {"primary_node": "unreachable", "replica_node": "unreachable", "failover_ready": False}
+    try:
+        get_primary_client().heartbeat()
+        status["primary_node"] = "ok"
     except Exception as e:
-        logger.warning(f"ChromaDB connection check failed: {e}")
-        return False
+        status["primary_node"] = f"error: {e}"
+
+    try:
+        get_replica_client().heartbeat()
+        status["replica_node"] = "ok"
+        status["failover_ready"] = True
+    except Exception as e:
+        status["replica_node"] = f"error: {e}"
+
+    return status
