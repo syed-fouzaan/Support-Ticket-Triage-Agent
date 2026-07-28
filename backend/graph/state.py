@@ -56,6 +56,10 @@ class TicketState(TypedDict, total=False):
     predicted_csat: float
     csat_category: str
 
+    # Cost Metering Node outputs
+    total_tokens: int
+    estimated_cost_usd: float
+
     # Decision Node outputs
     final_status: str  # OPEN, SOLVED, ESCALATED
     decision_reason: str

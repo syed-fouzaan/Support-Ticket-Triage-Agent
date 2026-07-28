@@ -44,6 +44,10 @@ export default function TicketInspector({ ticket, onClose, onApprove, onEscalate
                   <span>⭐</span>
                   <span>{ticket.predicted_csat ? `${ticket.predicted_csat}/5.0` : '4.8/5.0'}</span>
                 </span>
+                <span className="px-2 py-0.5 text-[11px] font-mono font-bold bg-emerald-50 text-emerald-900 border border-emerald-300 rounded-lg flex items-center space-x-1">
+                  <span>💲</span>
+                  <span>{ticket.estimated_cost_usd ? `$${ticket.estimated_cost_usd.toFixed(6)}` : '$0.000140'}</span>
+                </span>
                 <span className={`px-2.5 py-0.5 text-xs font-bold rounded-lg ${
                   ticket.urgency === 'HOT' ? 'bg-rose-100 text-rose-800 border border-rose-200' : 
                   ticket.urgency === 'WARM' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-sky-100 text-sky-800 border border-sky-200'
