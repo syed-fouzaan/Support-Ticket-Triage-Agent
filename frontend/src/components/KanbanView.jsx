@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 const URGENCY_CONFIG = {
-  HOT:  { dot: '#f56565', badge: '#f56565', cardBg: '#4a3040', cardBorder: '#744244' },
-  WARM: { dot: '#ed8936', badge: '#ed8936', cardBg: '#3d4028', cardBorder: '#6b5e2e' },
-  COLD: { dot: '#63b3ed', badge: '#63b3ed', cardBg: '#2d3f5c', cardBorder: '#3d5278' },
+  HOT:  { dot: '#ef4444', cardBg: '#fff5f5', cardBorder: '#fecaca', badgeColor: '#ef4444' },
+  WARM: { dot: '#f59e0b', cardBg: '#fffbeb', cardBorder: '#fde68a', badgeColor: '#d97706' },
+  COLD: { dot: '#3b82f6', cardBg: '#eff6ff', cardBorder: '#bfdbfe', badgeColor: '#2563eb' },
 };
 
 const COLUMNS = [
-  { id: 'OPEN',        label: 'Open',        dot: '#f56565', desc: 'Awaiting Triage' },
-  { id: 'IN_PROGRESS', label: 'In Progress',  dot: '#f6e05e', desc: 'Agent Processing' },
-  { id: 'RESOLVED',    label: 'Resolved',     dot: '#68d391', desc: 'Autonomous / Human' },
+  { id: 'OPEN',        label: 'Open',        dot: '#ef4444', desc: 'Awaiting Triage' },
+  { id: 'IN_PROGRESS', label: 'In Progress',  dot: '#f59e0b', desc: 'Agent Processing' },
+  { id: 'RESOLVED',    label: 'Resolved',     dot: '#10b981', desc: 'Autonomous / Human' },
 ];
 
 function TicketCard({ ticket, onDragStart }) {
@@ -30,27 +30,28 @@ function TicketCard({ ticket, onDragStart }) {
         cursor: 'grab',
         transition: 'transform 0.15s, box-shadow 0.15s',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 4px 18px rgba(0,0,0,0.35)'; }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.10)'; }}
       onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
     >
-      {/* Top Row: ID + urgency badge */}
+      {/* ID + urgency */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, alignItems: 'center' }}>
-        <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#a0aec0' }}>{ticket.id}</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: cfg.badge, fontSize: 10, fontWeight: 700 }}>
+        <span style={{ fontFamily: 'monospace', fontSize: 10, color: '#94a3b8' }}>{ticket.id}</span>
+        <span style={{ color: cfg.badgeColor, fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 3 }}>
           🔴 {urgency}
         </span>
       </div>
 
       {/* Subject */}
-      <p style={{ color: '#f7fafc', fontSize: 12, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.4 }}>
+      <p style={{ color: '#1e293b', fontSize: 12, fontWeight: 700, margin: '0 0 6px', lineHeight: 1.4 }}>
         {ticket.subject}
       </p>
 
-      {/* Customer + Intent badge row */}
+      {/* Customer + Intent */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-        <span style={{ color: '#718096', fontSize: 10 }}>{ticket.customer_name || 'Customer'}</span>
+        <span style={{ color: '#94a3b8', fontSize: 10 }}>{ticket.customer_name || 'Customer'}</span>
         <span style={{
-          background: '#2d3748', color: '#e2e8f0', fontSize: 10, fontWeight: 600,
+          background: '#1e293b', color: '#f1f5f9',
+          fontSize: 10, fontWeight: 600,
           borderRadius: 5, padding: '2px 7px',
         }}>
           {ticket.intent || 'Billing'}
@@ -58,8 +59,8 @@ function TicketCard({ ticket, onDragStart }) {
       </div>
 
       {/* Confidence bar */}
-      <div style={{ background: '#2d3748', borderRadius: 3, height: 4, overflow: 'hidden' }}>
-        <div style={{ width: `${confidencePct}%`, height: '100%', background: '#68d391', borderRadius: 3 }} />
+      <div style={{ background: '#e2e8f0', borderRadius: 3, height: 4, overflow: 'hidden' }}>
+        <div style={{ width: `${confidencePct}%`, height: '100%', background: '#10b981', borderRadius: 3 }} />
       </div>
     </div>
   );
@@ -110,7 +111,7 @@ export default function KanbanView({ tickets = [], onTicketMove }) {
   const totalCount = Object.values(columns).flat().length;
 
   return (
-    <div style={{ background: '#f1f5f9', minHeight: '100%' }}>
+    <div style={{ minHeight: '100%' }}>
 
       {/* Sub-header bar */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid #e2e8f0' }}>
@@ -132,28 +133,33 @@ export default function KanbanView({ tickets = [], onTicketMove }) {
               onDragLeave={() => setDragOverCol(null)}
               onDrop={(e) => handleDrop(e, col.id)}
               style={{
-                background: isOver ? '#2d3f5c' : '#2d3748',
+                background: isOver ? '#f0f9ff' : '#f8fafc',
                 borderRadius: 12,
-                padding: 0,
                 minHeight: 500,
-                border: isOver ? '2px solid #63b3ed' : '2px solid transparent',
+                border: isOver ? '2px solid #3b82f6' : '1px solid #e2e8f0',
                 transition: 'border 0.2s, background 0.2s',
                 overflow: 'hidden',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
               }}
             >
               {/* Column header */}
-              <div style={{ padding: '14px 16px', borderBottom: '1px solid #4a5568' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid #e2e8f0', background: '#ffffff' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: col.dot, display: 'inline-block', boxShadow: `0 0 6px ${col.dot}` }} />
+                    <span style={{
+                      width: 10, height: 10, borderRadius: '50%',
+                      background: col.dot, display: 'inline-block',
+                      boxShadow: `0 0 6px ${col.dot}55`,
+                    }} />
                     <div>
-                      <p style={{ color: '#f7fafc', fontWeight: 800, fontSize: 13, margin: 0 }}>{col.label}</p>
-                      <p style={{ color: '#718096', fontSize: 10, margin: 0 }}>{col.desc}</p>
+                      <p style={{ color: '#1e293b', fontWeight: 800, fontSize: 13, margin: 0 }}>{col.label}</p>
+                      <p style={{ color: '#94a3b8', fontSize: 10, margin: 0 }}>{col.desc}</p>
                     </div>
                   </div>
                   <span style={{
-                    background: '#4a5568', color: '#f7fafc', borderRadius: '50%',
-                    width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: '#1e293b', color: '#f8fafc',
+                    borderRadius: '50%', width: 24, height: 24,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 11, fontWeight: 800,
                   }}>
                     {colTickets.length}
@@ -162,13 +168,13 @@ export default function KanbanView({ tickets = [], onTicketMove }) {
               </div>
 
               {/* Cards area */}
-              <div style={{ padding: '12px 12px', maxHeight: 520, overflowY: 'auto' }}>
+              <div style={{ padding: '12px', maxHeight: 520, overflowY: 'auto' }}>
                 {colTickets.length === 0 ? (
                   <div style={{
-                    border: '2px dashed #4a5568', borderRadius: 9,
+                    border: '2px dashed #cbd5e1', borderRadius: 9,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    height: 80, color: isOver ? '#63b3ed' : '#718096', fontSize: 12,
-                    fontWeight: 500,
+                    height: 80, color: isOver ? '#3b82f6' : '#94a3b8',
+                    fontSize: 12, fontWeight: 500,
                   }}>
                     {isOver ? '↓ Drop here' : 'No tickets'}
                   </div>
