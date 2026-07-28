@@ -145,7 +145,7 @@ async def readiness():
 
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-from backend.api.routers import tickets, knowledge, analytics, ws, integrations, chaos
+from backend.api.routers import tickets, knowledge, analytics, ws, integrations, chaos, voice
 
 app.include_router(tickets.router)
 app.include_router(knowledge.router)
@@ -153,4 +153,5 @@ app.include_router(analytics.router)
 app.include_router(ws.router)
 app.include_router(integrations.router)
 app.include_router(chaos.router)
+app.include_router(voice.router)
 
