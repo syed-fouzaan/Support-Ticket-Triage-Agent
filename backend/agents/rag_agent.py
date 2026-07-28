@@ -20,6 +20,17 @@ async def rag_node(state: TicketState) -> TicketState:
     rag_sources = []
 
     try:
+        from backend.vectordb.graph_rag import retrieve_graph_rag_context
+        graph_data = retrieve_graph_rag_context(query=query, customer_id=state.get("customer_id", "cus_web_user"))
+        if graph_data.get("graph_context"):
+            retrieved_chunks.append({
+                "id": "graph_rag_entity_node",
+                "title": "GraphRAG Entity Traversal",
+                "content": graph_data["graph_context"],
+                "score": 0.98,
+                "source_type": "graph_rag",
+            })
+
         if check_chromadb_connection():
             from backend.vectordb.retrieval import retrieve_chunks
             
